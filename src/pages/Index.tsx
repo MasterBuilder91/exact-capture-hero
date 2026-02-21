@@ -73,11 +73,11 @@ const Index = () => {
     if (!result) return null;
     switch (mode) {
       case "body":
-        return <ResultsCard result={result as AnalysisResult} onReset={handleReset} />;
+        return <ResultsCard result={result as AnalysisResult} imageBase64={imageBase64!} onReset={handleReset} />;
       case "face":
-        return <FaceResultsCard result={result as FaceAnalysisResult} onReset={handleReset} />;
+        return <FaceResultsCard result={result as FaceAnalysisResult} imageBase64={imageBase64!} onReset={handleReset} />;
       case "hands":
-        return <HandsResultsCard result={result as HandAnalysisResult} onReset={handleReset} />;
+        return <HandsResultsCard result={result as HandAnalysisResult} imageBase64={imageBase64!} onReset={handleReset} />;
     }
   };
 

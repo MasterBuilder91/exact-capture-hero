@@ -2,13 +2,15 @@ import { AnalysisResult } from "@/types/analysis";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
+import ResultsOverlay from "./ResultsOverlay";
 
 interface ResultsCardProps {
   result: AnalysisResult;
+  imageBase64: string;
   onReset: () => void;
 }
 
-const ResultsCard = ({ result, onReset }: ResultsCardProps) => {
+const ResultsCard = ({ result, imageBase64, onReset }: ResultsCardProps) => {
   const sexColor = {
     Male: "bg-result-male",
     Female: "bg-result-female",
@@ -29,17 +31,16 @@ const ResultsCard = ({ result, onReset }: ResultsCardProps) => {
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
-      {/* Result badge */}
-      <div className="flex flex-col items-center gap-3">
-        <span className={cn("px-6 py-2.5 rounded-full text-sm font-semibold tracking-wide uppercase text-primary-foreground", sexColor)}>
-          {sexLabel}
-        </span>
-        <span className={cn("px-3 py-1 rounded-full text-xs font-medium text-primary-foreground", confidenceColor)}>
-          {result.confidence_level} Confidence
-        </span>
-      </div>
+      <ResultsOverlay
+        imageBase64={imageBase64}
+        sexLabel={sexLabel}
+        sexColor={sexColor}
+        confidenceLabel={`${result.confidence_level} Confidence`}
+        confidenceColor={confidenceColor}
+        reasoning={result.reasoning}
+      />
 
-      {/* Proportion table */}
+      {/* Breakdown table */}
       <div className="rounded-lg border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead>
@@ -63,12 +64,6 @@ const ResultsCard = ({ result, onReset }: ResultsCardProps) => {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      {/* Reasoning */}
-      <div className="rounded-lg border border-border bg-card p-4">
-        <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2">AI Analysis</h3>
-        <p className="text-sm text-secondary-foreground leading-relaxed">{result.reasoning}</p>
       </div>
 
       {/* Reset */}
