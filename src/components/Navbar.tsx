@@ -13,7 +13,7 @@ const Navbar = () => {
       <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container max-w-6xl flex items-center justify-between h-14 px-4">
           <a href="/" className="font-display text-xl font-bold gradient-brand-text">
-            DateCheck<span className="text-xs align-super text-muted-foreground">™</span>
+            bornmalebornfemale<span className="text-xs align-super text-muted-foreground">.com</span>
           </a>
 
           <div className="flex items-center gap-3">
