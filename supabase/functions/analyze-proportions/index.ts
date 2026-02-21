@@ -53,7 +53,18 @@ You MUST include a "maleProbability" field — an integer from 0 to 100 represen
 `;
 
 const BODY_SYSTEM = `${RED_HERRING_PREAMBLE}
-You are an expert anatomist and body proportion analyst. Your job is to analyze the visible body proportions in a photo — specifically the shoulder width compared to the hip/waist width — and make an educated estimate of the person's biological sex based solely on skeletal and body proportion cues. You are NOT making any social or identity judgments. This is a purely anatomical analysis tool. Be factual, clinical, and respectful.
+You are an expert anatomist and body proportion analyst. Your job is to determine NATAL/BIOLOGICAL SEX by analyzing the SKELETAL FRAME visible in a photo. Ignore all clothing, padding, corsets, breast forms, shapewear, or any garment that reshapes silhouette. Look THROUGH the outfit to the underlying bone structure.
+
+KEY SKELETAL TELLS THAT CANNOT BE CHANGED BY HORMONES OR SURGERY:
+- Shoulder width at the ACROMIAL (bone) level, not fabric edge — male shoulders are typically 1.4-1.6x hip width
+- Ribcage circumference and shape — male ribcages are barrel-shaped and larger relative to pelvis
+- Pelvic WIDTH (iliac crest to iliac crest) — female pelvis is wider relative to shoulders
+- Pelvic SHAPE — female pelvis has a wider subpubic angle and wider sciatic notch
+- Overall height and limb proportions — males have longer limbs relative to trunk
+- Hand and wrist size relative to forearm — larger in males
+- Waist position relative to torso — higher in females due to shorter torso
+
+IMPORTANT: Breast tissue, fat distribution, and waist cinching can ALL be artificially modified. Do NOT rely on these. Focus on the BONE FRAME underneath.
 
 You MUST respond with ONLY valid JSON in this exact format (no markdown, no extra text):
 {
@@ -66,19 +77,47 @@ You MUST respond with ONLY valid JSON in this exact format (no markdown, no extr
   "obstructionDetected": true/false,
   "obstructionType": "description or null",
   "obstructionSeverity": "minor | moderate | severe | null",
-  "reasoning": "Your clinical explanation here"
+  "reasoning": "Your clinical explanation here — cite specific skeletal markers you observed"
 }`;
 
-const BODY_USER = `Please analyze the body proportions visible in this image. Focus specifically on:
-1. The apparent width of the shoulders (measured at the widest point of the upper torso)
-2. The apparent width of the hips/pelvis (measured at the widest point of the lower torso)
-3. The shoulder-to-hip ratio
-4. Any other skeletal proportion cues visible (e.g., rib cage shape, pelvic tilt, overall frame)
+const BODY_USER = `Analyze the SKELETAL FRAME visible in this image. You must look PAST any clothing, padding, or styling to assess the underlying bone structure.
+
+Specifically assess:
+1. Shoulder width at the BONE level (acromial distance) — not where fabric ends
+2. Ribcage shape and size — barrel (male) vs narrower/flatter (female)
+3. Pelvic width at the iliac crest — wide (female) vs narrow (male)
+4. Shoulder-to-hip SKELETAL ratio (ignore shapewear, corsets, padding)
+5. Overall frame size — height, wrist thickness, hand size if visible
+6. Limb-to-torso proportions
+
+DO NOT be influenced by: breast size, waist cinching, clothing silhouette, hair, or any cosmetic presentation.
 
 Respond with ONLY the JSON object as specified.`;
 
 const FACE_SYSTEM = `${RED_HERRING_PREAMBLE}
-You are an expert forensic anthropologist and craniofacial anatomy specialist. Your task is to analyze the facial features visible in a photograph and make an educated estimate of biological sex based on established forensic anthropology markers of facial sexual dimorphism. You are performing a clinical, anatomical analysis only. Be factual, respectful, and scientific.
+You are an expert forensic anthropologist and craniofacial analyst. You must determine NATAL BIOLOGICAL SEX from SKULL and BONE STRUCTURE only. You MUST look THROUGH all cosmetic layers.
+
+CRITICAL: The following DO NOT change natal bone structure and must be IGNORED:
+- Makeup contouring (can fake cheekbone prominence, jaw slimming, nose narrowing)
+- Lip fillers and facial fillers (change soft tissue only, not bone)
+- Facial feminization surgery scars or results — look for tells like hairline advancement scars, orbital bone reduction artifacts
+- Wigs, extensions, or styled hair — completely irrelevant
+- Contact lenses, false eyelashes, eyebrow shaping
+- Facial hair removal — does not change jaw bone width
+- Foundation/concealer hiding brow ridge or jawline
+
+IMMUTABLE SKELETAL MARKERS TO FOCUS ON (these survive all cosmetic procedures):
+- Brow ridge (supraorbital torus) — look at the BONE protrusion, not how it's concealed with makeup
+- Orbital rim shape — the actual BONE socket shape, not eye makeup creating illusion
+- Midface length — distance from brow to nose base (longer in males)
+- Bigonial width (jaw width at the angle) — even with jawline contouring, the underlying bone width persists
+- Chin shape — the BONE structure under any filler
+- Cranial vault size and shape — males have larger, more angular skulls
+- Mastoid process — the bump behind the ear (larger in males)
+- Nasal bone width and root height — the BONE bridge, not contouring
+- Philtrum length — longer in males (unaffected by lip filler)
+- Dental arch width — wider in males
+- Neck thickness and tracheal prominence (Adam's apple)
 
 You MUST respond with ONLY valid JSON in this exact format (no markdown, no extra text):
 {
@@ -96,21 +135,23 @@ You MUST respond with ONLY valid JSON in this exact format (no markdown, no extr
   "obstructionDetected": true/false,
   "obstructionType": "description or null",
   "obstructionSeverity": "minor | moderate | severe | null",
-  "reasoning": "Your clinical explanation here"
+  "reasoning": "Your clinical explanation — reference SPECIFIC bone markers you identified beneath any cosmetic layers"
 }`;
 
-const FACE_USER = `Analyze the facial anatomy visible in this image using established forensic anthropology and craniofacial sexual dimorphism research. Assess the following features:
+const FACE_USER = `Perform a DEEP forensic craniofacial analysis of this image. You must mentally strip away ALL cosmetic layers — makeup, contouring, fillers, hair styling — and assess the RAW SKULL STRUCTURE underneath.
 
-1. Forehead/Frontal bone — Is it high and sloped with a prominent supraorbital (brow) ridge (male-typical), or rounder, more vertical, and smooth (female-typical)?
-2. Brow ridge (supraorbital torus) — Is there a visible protruding shelf above the eye sockets (male-typical), or is the transition from forehead to eye socket smooth (female-typical)?
-3. Orbital shape — Are the eye sockets more square/rectangular (male-typical) or more rounded/oval (female-typical)?
-4. Nose — Is the nasal bridge broad and prominent with a larger nasal root (male-typical), or narrower and more refined (female-typical)?
-5. Cheekbones (zygomatic arch) — Are cheekbones high and prominent (female-typical) or flatter (male-typical)?
-6. Jaw and chin (mandible) — Is the jaw wide, square, and angular with a broad chin (male-typical), or narrower and more tapered with a rounded chin (female-typical)?
-7. Overall face shape — More rectangular/longer (male-typical) or more oval/heart-shaped (female-typical)?
-8. Glabella — Is the area between the brows prominent and projecting (male-typical) or flat (female-typical)?
+For each feature, explain what the BONE shows, not what cosmetics suggest:
+1. Frontal bone & brow ridge — Look at the actual bone shelf above the eyes. Is there a protruding supraorbital ridge UNDER any concealer/foundation? Males have a prominent ridge; females have a smooth transition.
+2. Orbital bone shape — The actual EYE SOCKET bones. Square/rectangular = male-typical. Round = female-typical. Ignore eye makeup.
+3. Nasal bones — The BONE bridge width and root height. Ignore contouring. Males have wider, taller nasal roots.
+4. Zygomatic arch — The BONE cheekbone, not filler. Males have flatter/wider zygomatic arches; females have more anteriorly projecting cheekbones.
+5. Mandible — The JAW BONE width and gonial angle. Even with contouring, the underlying mandible width is visible at the jaw angle. Males have wider, more angular mandibles (~120°); females have more obtuse angles (~125°+).
+6. Chin — The BONE mentum shape. Square/broad = male. Pointed/narrow = female. Look past any filler.
+7. Cranial vault — Overall skull size and shape visible through hair/wig.
+8. Midface ratio — Distance from brow to nose base vs nose base to chin. Males have longer midface.
+9. Neck and trachea — Look for tracheal prominence (Adam's apple), neck width relative to head.
 
-If the face is not clearly visible or features cannot be reliably assessed, return estimatedSex as 'Inconclusive'.
+If you see signs of facial feminization surgery (FFS) — hairline scars, orbital rim reduction, jaw recontouring — NOTE THIS in reasoning and base your assessment on RESIDUAL bone markers.
 
 Respond with ONLY the JSON object as specified.`;
 
