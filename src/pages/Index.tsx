@@ -1,5 +1,7 @@
 import { useState } from "react";
-import HeroSection from "@/components/HeroSection";
+import { useAuth } from "@/contexts/AuthContext";
+import Navbar from "@/components/Navbar";
+import LandingPage from "@/components/LandingPage";
 import UploadZone from "@/components/UploadZone";
 import AnalysisLoader from "@/components/AnalysisLoader";
 import ResultsCard from "@/components/ResultsCard";
@@ -26,12 +28,15 @@ const LOADER_TEXT: Record<AnalysisMode, { title: string; subtitle: string }> = {
 };
 
 const Index = () => {
+  const { user, subscription, loading: authLoading } = useAuth();
   const [mode, setMode] = useState<AnalysisMode>("body");
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | FaceAnalysisResult | HandAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const isSubscribed = subscription.subscribed;
 
   const handleAnalyze = async () => {
     if (!imageBase64) return;
@@ -81,10 +86,24 @@ const Index = () => {
     }
   };
 
+  // Show landing page if not subscribed
+  if (!authLoading && (!user || !isSubscribed)) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <LandingPage />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <Navbar />
       <main className="flex-1 container max-w-2xl py-8 px-4 space-y-8">
-        {!result && <HeroSection onUploadClick={() => {}} />}
+        <div className="text-center space-y-2">
+          <h1 className="font-display text-3xl font-bold gradient-brand-text">DateCheck</h1>
+          <p className="text-sm text-muted-foreground">Know before you go.</p>
+        </div>
 
         <ModuleSelector mode={mode} onModeChange={handleModeChange} />
 
@@ -94,9 +113,7 @@ const Index = () => {
           renderResults()
         ) : (
           <>
-            {!result && (
-              <p className="text-center text-xs text-muted-foreground">{UPLOAD_GUIDANCE[mode]}</p>
-            )}
+            <p className="text-center text-xs text-muted-foreground">{UPLOAD_GUIDANCE[mode]}</p>
 
             <UploadZone
               onImageSelected={setImageBase64}
@@ -106,7 +123,7 @@ const Index = () => {
 
             {imageBase64 && (
               <div className="flex justify-center">
-                <Button onClick={handleAnalyze} size="lg" className="gap-2 glow-teal">
+                <Button onClick={handleAnalyze} size="lg" className="gap-2 gradient-brand text-primary-foreground">
                   <Scan className="w-4 h-4" />
                   Analyze {mode === "body" ? "Proportions" : mode === "face" ? "Face" : "Hands"}
                 </Button>
