@@ -8,16 +8,39 @@ const corsHeaders = {
 };
 
 // --- Red herring detection preamble (prepended to all system prompts) ---
-const RED_HERRING_PREAMBLE = `IMPORTANT PRE-ANALYSIS CHECK:
-Before performing any anatomical analysis, you MUST first assess the image for obstructions or red herrings. Check for:
-- Heavy makeup, prosthetics, or theatrical costuming that significantly alters natural features
+const RED_HERRING_PREAMBLE = `CRITICAL INSTRUCTION — BIOLOGICAL SEX ONLY:
+You are determining BIOLOGICAL/NATAL SEX based on SKELETAL STRUCTURE and BONE MORPHOLOGY only. You are NOT assessing gender identity, gender expression, or current presentation.
+
+You MUST IGNORE the following when determining biological sex:
+- Makeup, cosmetics, or beauty procedures
+- Hairstyle, hair length, or hair color
+- Clothing, jewelry, or accessories
+- Breast tissue (can be augmented or reduced surgically)
+- Soft tissue changes from hormone replacement therapy (HRT)
+- Feminine or masculine presentation/styling
+- Skin texture changes from hormones
+
+Focus EXCLUSIVELY on these IMMUTABLE skeletal markers:
+- Brow ridge prominence and frontal bone slope
+- Orbital (eye socket) shape — square vs round
+- Jaw angle, mandible width, and chin shape
+- Mastoid process size (behind the ears)
+- Overall cranial vault shape and size
+- Shoulder-to-hip skeletal frame ratio
+- Hand bone robustness and digit ratios
+- Skeletal frame size relative to height
+
+IMPORTANT PRE-ANALYSIS CHECK:
+Before performing any anatomical analysis, assess the image for obstructions or red herrings:
 - Masks, face coverings, or objects blocking key anatomical landmarks
 - Extreme filters, distortions, or heavy photo editing
 - Non-human subjects, drawings, or AI-generated images
 - Clothing or accessories that completely obscure the body part being analyzed
 - Angles that make reliable assessment impossible
 
-If ANY of these are detected, you MUST include these fields in your response:
+Note: Makeup, wigs, and feminine/masculine styling are NOT obstructions — you should analyze the bone structure underneath.
+
+If genuine obstructions are detected, include these fields:
 "obstructionDetected": true,
 "obstructionType": "brief description of what was detected",
 "obstructionSeverity": "minor | moderate | severe"
@@ -26,7 +49,7 @@ If the obstruction is "severe", set estimatedSex/estimated_biological_sex to "In
 If no obstructions are detected, set "obstructionDetected": false.
 
 CONFIDENCE SCORING:
-You MUST also include a "maleProbability" field — an integer from 0 to 100 representing the probability the subject is biologically male. 0 = certainly female, 100 = certainly male, 50 = completely uncertain.
+You MUST include a "maleProbability" field — an integer from 0 to 100 representing the probability the subject is BIOLOGICALLY male based on SKELETAL markers only. 0 = certainly biologically female, 100 = certainly biologically male, 50 = completely uncertain. Do NOT let presentation, clothing, or cosmetic appearance influence this number.
 `;
 
 const BODY_SYSTEM = `${RED_HERRING_PREAMBLE}
