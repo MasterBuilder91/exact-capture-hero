@@ -2,13 +2,15 @@ import { HandAnalysisResult } from "@/types/analysis";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
+import ResultsOverlay from "./ResultsOverlay";
 
 interface HandsResultsCardProps {
   result: HandAnalysisResult;
+  imageBase64: string;
   onReset: () => void;
 }
 
-const HandsResultsCard = ({ result, onReset }: HandsResultsCardProps) => {
+const HandsResultsCard = ({ result, imageBase64, onReset }: HandsResultsCardProps) => {
   const sexColor = {
     Male: "bg-result-male",
     Female: "bg-result-female",
@@ -40,14 +42,14 @@ const HandsResultsCard = ({ result, onReset }: HandsResultsCardProps) => {
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
-      <div className="flex flex-col items-center gap-3">
-        <span className={cn("px-6 py-2.5 rounded-full text-sm font-semibold tracking-wide uppercase text-primary-foreground", sexColor)}>
-          {sexLabel}
-        </span>
-        <span className={cn("px-3 py-1 rounded-full text-xs font-medium text-primary-foreground", confidenceColor)}>
-          {result.confidence} Confidence
-        </span>
-      </div>
+      <ResultsOverlay
+        imageBase64={imageBase64}
+        sexLabel={sexLabel}
+        sexColor={sexColor}
+        confidenceLabel={`${result.confidence} Confidence`}
+        confidenceColor={confidenceColor}
+        reasoning={result.reasoning}
+      />
 
       <div className="rounded-lg border border-border overflow-hidden">
         <table className="w-full text-sm">
@@ -66,11 +68,6 @@ const HandsResultsCard = ({ result, onReset }: HandsResultsCardProps) => {
             ))}
           </tbody>
         </table>
-      </div>
-
-      <div className="rounded-lg border border-border bg-card p-4">
-        <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2">AI Analysis</h3>
-        <p className="text-sm text-secondary-foreground leading-relaxed">{result.reasoning}</p>
       </div>
 
       <div className="flex justify-center">
