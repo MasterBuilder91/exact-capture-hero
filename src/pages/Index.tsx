@@ -86,15 +86,15 @@ const Index = () => {
     }
   };
 
-  // Show landing page if not subscribed
-  if (!authLoading && (!user || !isSubscribed)) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
-        <LandingPage />
-      </div>
-    );
-  }
+  // Paywall disabled for testing — show tools to everyone
+  // if (!authLoading && (!user || !isSubscribed)) {
+  //   return (
+  //     <div className="min-h-screen bg-background flex flex-col">
+  //       <Navbar />
+  //       <LandingPage />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
