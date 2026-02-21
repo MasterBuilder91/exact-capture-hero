@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { AwsClient } from "jsr:@mhart/aws4fetch@1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,7 +7,30 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const BODY_SYSTEM = `You are an expert anatomist and body proportion analyst. Your job is to analyze the visible body proportions in a photo — specifically the shoulder width compared to the hip/waist width — and make an educated estimate of the person's biological sex based solely on skeletal and body proportion cues. You are NOT making any social or identity judgments. This is a purely anatomical analysis tool. Be factual, clinical, and respectful.
+// --- Red herring detection preamble (prepended to all system prompts) ---
+const RED_HERRING_PREAMBLE = `IMPORTANT PRE-ANALYSIS CHECK:
+Before performing any anatomical analysis, you MUST first assess the image for obstructions or red herrings. Check for:
+- Heavy makeup, prosthetics, or theatrical costuming that significantly alters natural features
+- Masks, face coverings, or objects blocking key anatomical landmarks
+- Extreme filters, distortions, or heavy photo editing
+- Non-human subjects, drawings, or AI-generated images
+- Clothing or accessories that completely obscure the body part being analyzed
+- Angles that make reliable assessment impossible
+
+If ANY of these are detected, you MUST include these fields in your response:
+"obstructionDetected": true,
+"obstructionType": "brief description of what was detected",
+"obstructionSeverity": "minor | moderate | severe"
+
+If the obstruction is "severe", set estimatedSex/estimated_biological_sex to "Inconclusive" and confidence/confidence_level to "Low".
+If no obstructions are detected, set "obstructionDetected": false.
+
+CONFIDENCE SCORING:
+You MUST also include a "maleProbability" field — an integer from 0 to 100 representing the probability the subject is biologically male. 0 = certainly female, 100 = certainly male, 50 = completely uncertain.
+`;
+
+const BODY_SYSTEM = `${RED_HERRING_PREAMBLE}
+You are an expert anatomist and body proportion analyst. Your job is to analyze the visible body proportions in a photo — specifically the shoulder width compared to the hip/waist width — and make an educated estimate of the person's biological sex based solely on skeletal and body proportion cues. You are NOT making any social or identity judgments. This is a purely anatomical analysis tool. Be factual, clinical, and respectful.
 
 You MUST respond with ONLY valid JSON in this exact format (no markdown, no extra text):
 {
@@ -15,6 +39,10 @@ You MUST respond with ONLY valid JSON in this exact format (no markdown, no extr
   "shoulder_to_hip_ratio": "shoulders broader | roughly equal | hips broader",
   "estimated_biological_sex": "Male | Female | Inconclusive",
   "confidence_level": "Low | Moderate | High",
+  "maleProbability": 0-100,
+  "obstructionDetected": true/false,
+  "obstructionType": "description or null",
+  "obstructionSeverity": "minor | moderate | severe | null",
   "reasoning": "Your clinical explanation here"
 }`;
 
@@ -26,7 +54,8 @@ const BODY_USER = `Please analyze the body proportions visible in this image. Fo
 
 Respond with ONLY the JSON object as specified.`;
 
-const FACE_SYSTEM = `You are an expert forensic anthropologist and craniofacial anatomy specialist. Your task is to analyze the facial features visible in a photograph and make an educated estimate of biological sex based on established forensic anthropology markers of facial sexual dimorphism. You are performing a clinical, anatomical analysis only. Be factual, respectful, and scientific.
+const FACE_SYSTEM = `${RED_HERRING_PREAMBLE}
+You are an expert forensic anthropologist and craniofacial anatomy specialist. Your task is to analyze the facial features visible in a photograph and make an educated estimate of biological sex based on established forensic anthropology markers of facial sexual dimorphism. You are performing a clinical, anatomical analysis only. Be factual, respectful, and scientific.
 
 You MUST respond with ONLY valid JSON in this exact format (no markdown, no extra text):
 {
@@ -40,6 +69,10 @@ You MUST respond with ONLY valid JSON in this exact format (no markdown, no extr
   "glabella": "prominent | flat | unclear",
   "estimatedSex": "Male | Female | Inconclusive",
   "confidence": "Low | Moderate | High",
+  "maleProbability": 0-100,
+  "obstructionDetected": true/false,
+  "obstructionType": "description or null",
+  "obstructionSeverity": "minor | moderate | severe | null",
   "reasoning": "Your clinical explanation here"
 }`;
 
@@ -58,7 +91,8 @@ If the face is not clearly visible or features cannot be reliably assessed, retu
 
 Respond with ONLY the JSON object as specified.`;
 
-const HANDS_SYSTEM = `You are an expert forensic anthropologist specializing in hand anatomy and skeletal sexual dimorphism. Your task is to analyze the hand and any visible skeletal features in a photograph and make an educated estimate of biological sex based on established forensic anthropology and anatomy research. You are performing a clinical, anatomical analysis only. Be factual, respectful, and scientific.
+const HANDS_SYSTEM = `${RED_HERRING_PREAMBLE}
+You are an expert forensic anthropologist specializing in hand anatomy and skeletal sexual dimorphism. Your task is to analyze the hand and any visible skeletal features in a photograph and make an educated estimate of biological sex based on established forensic anthropology and anatomy research. You are performing a clinical, anatomical analysis only. Be factual, respectful, and scientific.
 
 You MUST respond with ONLY valid JSON in this exact format (no markdown, no extra text):
 {
@@ -72,6 +106,10 @@ You MUST respond with ONLY valid JSON in this exact format (no markdown, no extr
   "clavicle": "long/robust/curved (male-typical) | short/gracile (female-typical) | not visible",
   "estimatedSex": "Male | Female | Inconclusive",
   "confidence": "Low | Moderate | High",
+  "maleProbability": 0-100,
+  "obstructionDetected": true/false,
+  "obstructionType": "description or null",
+  "obstructionSeverity": "minor | moderate | severe | null",
   "reasoning": "Your clinical explanation here"
 }`;
 
@@ -93,6 +131,53 @@ const prompts: Record<string, { system: string; user: string }> = {
   face: { system: FACE_SYSTEM, user: FACE_USER },
   hands: { system: HANDS_SYSTEM, user: HANDS_USER },
 };
+
+// --- AWS Rekognition helper (Face module only) ---
+async function callRekognition(imageBase64: string): Promise<{ Gender: { Value: string; Confidence: number } } | null> {
+  const accessKey = Deno.env.get("AWS_ACCESS_KEY_ID");
+  const secretKey = Deno.env.get("AWS_SECRET_ACCESS_KEY");
+  if (!accessKey || !secretKey) {
+    console.warn("AWS credentials not configured, skipping Rekognition");
+    return null;
+  }
+
+  try {
+    const aws = new AwsClient({ accessKeyId: accessKey, secretAccessKey: secretKey });
+
+    // Strip data URL prefix if present
+    const rawBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+    const imageBytes = Uint8Array.from(atob(rawBase64), (c) => c.charCodeAt(0));
+
+    const body = JSON.stringify({
+      Image: { Bytes: rawBase64 },
+      Attributes: ["ALL"],
+    });
+
+    const response = await aws.fetch("https://rekognition.us-east-1.amazonaws.com", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-amz-json-1.1",
+        "X-Amz-Target": "RekognitionService.DetectFaces",
+      },
+      body,
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Rekognition error:", response.status, errText);
+      return null;
+    }
+
+    const data = await response.json();
+    const face = data.FaceDetails?.[0];
+    if (!face?.Gender) return null;
+
+    return { Gender: face.Gender };
+  } catch (err) {
+    console.error("Rekognition call failed:", err);
+    return null;
+  }
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -118,7 +203,8 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Run AI analysis (and Rekognition in parallel for face mode)
+    const aiPromise = fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -140,8 +226,12 @@ Deno.serve(async (req: Request) => {
       }),
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
+    const rekognitionPromise = mode === "face" ? callRekognition(image) : Promise.resolve(null);
+
+    const [aiResponse, rekognitionResult] = await Promise.all([aiPromise, rekognitionPromise]);
+
+    if (!aiResponse.ok) {
+      const errText = await aiResponse.text();
       console.error("AI API error:", errText);
       return new Response(
         JSON.stringify({ error: "Analysis failed. Please try again with a clearer photo." }),
@@ -149,12 +239,21 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const data = await response.json();
+    const data = await aiResponse.json();
     const content = data.choices?.[0]?.message?.content || "";
 
     try {
       const cleaned = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
       const parsed = JSON.parse(cleaned);
+
+      // Merge Rekognition data for face mode
+      if (mode === "face" && rekognitionResult) {
+        parsed.rekognition = {
+          gender: rekognitionResult.Gender.Value,
+          confidence: Math.round(rekognitionResult.Gender.Confidence * 10) / 10,
+        };
+      }
+
       return new Response(JSON.stringify(parsed), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
