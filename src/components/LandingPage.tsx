@@ -45,8 +45,11 @@ const LandingPage = () => {
           <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-tight">
             Everyone Has the Right to <span className="gradient-brand-text">Know.</span>
           </h1>
+          <p className="text-xl font-medium text-foreground max-w-xl mx-auto">
+            Is your date really who they say they are?
+          </p>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Science-backed biological sex analysis from photos. <strong className="text-foreground">Body. Face. Hands.</strong>
+            Find out in seconds with science-backed biological sex analysis. <strong className="text-foreground">Body. Face. Hands.</strong>
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
             <Button
