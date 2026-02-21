@@ -38,6 +38,10 @@ const ResultsCard = ({ result, imageBase64, onReset }: ResultsCardProps) => {
         confidenceLabel={`${result.confidence_level} Confidence`}
         confidenceColor={confidenceColor}
         reasoning={result.reasoning}
+        maleProbability={result.maleProbability}
+        obstructionDetected={result.obstructionDetected}
+        obstructionType={result.obstructionType}
+        obstructionSeverity={result.obstructionSeverity}
       />
 
       {/* Breakdown table */}
@@ -66,7 +70,6 @@ const ResultsCard = ({ result, imageBase64, onReset }: ResultsCardProps) => {
         </table>
       </div>
 
-      {/* Reset */}
       <div className="flex justify-center">
         <Button onClick={onReset} variant="outline" className="gap-2">
           <RotateCcw className="w-4 h-4" />

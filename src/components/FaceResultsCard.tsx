@@ -49,6 +49,11 @@ const FaceResultsCard = ({ result, imageBase64, onReset }: FaceResultsCardProps)
         confidenceLabel={`${result.confidence} Confidence`}
         confidenceColor={confidenceColor}
         reasoning={result.reasoning}
+        maleProbability={result.maleProbability}
+        obstructionDetected={result.obstructionDetected}
+        obstructionType={result.obstructionType}
+        obstructionSeverity={result.obstructionSeverity}
+        rekognition={result.rekognition}
       />
 
       <div className="rounded-lg border border-border overflow-hidden">

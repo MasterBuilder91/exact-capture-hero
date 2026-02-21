@@ -1,6 +1,14 @@
 export type AnalysisMode = "body" | "face" | "hands";
 
-export interface AnalysisResult {
+// Common fields added by red herring detection + nuanced scoring
+interface BaseAnalysisFields {
+  maleProbability: number;
+  obstructionDetected: boolean;
+  obstructionType?: string | null;
+  obstructionSeverity?: "minor" | "moderate" | "severe" | null;
+}
+
+export interface AnalysisResult extends BaseAnalysisFields {
   shoulder_width: string;
   hip_width: string;
   shoulder_to_hip_ratio: string;
@@ -9,7 +17,7 @@ export interface AnalysisResult {
   reasoning: string;
 }
 
-export interface FaceAnalysisResult {
+export interface FaceAnalysisResult extends BaseAnalysisFields {
   foreheadType: string;
   browRidge: string;
   orbitalShape: string;
@@ -21,9 +29,13 @@ export interface FaceAnalysisResult {
   estimatedSex: "Male" | "Female" | "Inconclusive";
   confidence: "Low" | "Moderate" | "High";
   reasoning: string;
+  rekognition?: {
+    gender: string;
+    confidence: number;
+  };
 }
 
-export interface HandAnalysisResult {
+export interface HandAnalysisResult extends BaseAnalysisFields {
   digitRatio: string;
   handSize: string;
   metacarpalRobustness: string;
