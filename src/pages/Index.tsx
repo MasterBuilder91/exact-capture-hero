@@ -101,8 +101,8 @@ const Index = () => {
       <Navbar />
       <main className="flex-1 container max-w-2xl py-8 px-4 space-y-8">
         <div className="text-center space-y-2">
-          <h1 className="font-display text-3xl font-bold gradient-brand-text">DateCheck</h1>
-          <p className="text-sm text-muted-foreground">Know before you go.</p>
+          <h1 className="font-display text-3xl font-bold gradient-brand-text">Born Male Born Female</h1>
+          <p className="text-sm text-muted-foreground">Everyone has the right to know.</p>
         </div>
 
         <ModuleSelector mode={mode} onModeChange={handleModeChange} />

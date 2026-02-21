@@ -43,7 +43,7 @@ const LandingPage = () => {
 
         <div className="relative z-10 text-center max-w-3xl mx-auto px-4 space-y-6 py-20">
           <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-tight">
-            Know Who You're <span className="gradient-brand-text">Really Dating.</span>
+            Everyone Has the Right to <span className="gradient-brand-text">Know.</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
             Science-backed biological sex analysis from photos. <strong className="text-foreground">Body. Face. Hands.</strong>
@@ -68,7 +68,7 @@ const LandingPage = () => {
       <section className="py-16 px-4">
         <div className="max-w-2xl mx-auto text-center space-y-4">
           <p className="text-muted-foreground leading-relaxed">
-            In today's dating landscape, transparency matters. DateCheck is a safety and awareness tool for people
+            In today's dating landscape, transparency matters. Born Male Born Female is a safety and awareness tool for people
             who want to make informed decisions about who they date. Upload a photo and let our AI analyze body,
             facial, and hand proportions using the same forensic anthropology markers scientists use — and get an
             educated, science-based estimate in seconds.
@@ -123,14 +123,14 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Why DateCheck */}
+      {/* Why Born Male Born Female */}
       <section className="py-16 px-4 bg-secondary/30">
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <h2 className="font-display text-3xl font-bold">
-            Your right to <span className="gradient-brand-text">know.</span>
+            Everyone has the right to <span className="gradient-brand-text">know.</span>
           </h2>
           <p className="text-muted-foreground leading-relaxed max-w-xl mx-auto">
-            Transparency in dating isn't just a preference — it's a safety issue. DateCheck gives you a science-based second
+            Transparency in dating isn't just a preference — it's a safety issue. Born Male Born Female gives you a science-based second
             opinion so you can make informed decisions. No judgment. Just data.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
@@ -188,8 +188,8 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="border-t border-border py-10 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-4">
-          <p className="font-display text-lg font-bold gradient-brand-text">DateCheck™</p>
-          <p className="text-sm text-muted-foreground">Know before you go.</p>
+          <p className="font-display text-lg font-bold gradient-brand-text">Born Male Born Female™</p>
+          <p className="text-sm text-muted-foreground">Everyone has the right to know.</p>
           <div className="flex justify-center gap-4 text-xs text-muted-foreground">
             <span>Privacy Policy</span>
             <span>•</span>
@@ -198,7 +198,7 @@ const LandingPage = () => {
             <span>Contact</span>
           </div>
           <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            DateCheck provides educational estimates based on anatomical proportion analysis.
+            Born Male Born Female provides educational estimates based on anatomical proportion analysis.
             Results are not a definitive determination of biological sex or gender identity.
             For informational purposes only.
           </p>
