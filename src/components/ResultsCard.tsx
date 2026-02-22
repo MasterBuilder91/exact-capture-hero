@@ -1,5 +1,4 @@
 import { AnalysisResult } from "@/types/analysis";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
 import ResultsOverlay from "./ResultsOverlay";
@@ -29,6 +28,15 @@ const ResultsCard = ({ result, imageBase64, onReset }: ResultsCardProps) => {
     Low: "bg-confidence-low",
   }[result.confidence_level];
 
+  const rows: [string, string | undefined][] = [
+    ["Shoulder Width", result.shoulder_width],
+    ["Hip Width", result.hip_width],
+    ["Shoulder-to-Hip Ratio", result.shoulder_to_hip_ratio],
+    ["Clavicle Angle", result.clavicle_angle],
+    ["Shoulder-Neck Ratio", result.shoulder_neck_ratio],
+    ["Deltoid Definition", result.deltoid_definition],
+  ];
+
   return (
     <div className="max-w-lg mx-auto space-y-6">
       <ResultsOverlay
@@ -42,9 +50,12 @@ const ResultsCard = ({ result, imageBase64, onReset }: ResultsCardProps) => {
         obstructionDetected={result.obstructionDetected}
         obstructionType={result.obstructionType}
         obstructionSeverity={result.obstructionSeverity}
+        concealmentScore={result.concealment_score}
+        concealmentReasons={result.concealment_reasons}
+        neckAnalysis={result.neck_analysis}
+        betterPhotoSuggestion={result.better_photo_suggestion}
       />
 
-      {/* Breakdown table */}
       <div className="rounded-lg border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead>
@@ -54,18 +65,12 @@ const ResultsCard = ({ result, imageBase64, onReset }: ResultsCardProps) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            <tr>
-              <td className="px-4 py-3 text-foreground">Shoulder Width</td>
-              <td className="px-4 py-3 text-right font-mono text-primary">{result.shoulder_width}</td>
-            </tr>
-            <tr>
-              <td className="px-4 py-3 text-foreground">Hip Width</td>
-              <td className="px-4 py-3 text-right font-mono text-primary">{result.hip_width}</td>
-            </tr>
-            <tr>
-              <td className="px-4 py-3 text-foreground">Shoulder-to-Hip Ratio</td>
-              <td className="px-4 py-3 text-right font-mono text-primary">{result.shoulder_to_hip_ratio}</td>
-            </tr>
+            {rows.filter(([, v]) => v && v !== "not visible").map(([label, value]) => (
+              <tr key={label}>
+                <td className="px-4 py-3 text-foreground">{label}</td>
+                <td className="px-4 py-3 text-right font-mono text-primary">{value}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
