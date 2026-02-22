@@ -3,16 +3,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import LandingPage from "@/components/LandingPage";
 import UploadZone from "@/components/UploadZone";
+import MediaUploadZone from "@/components/MediaUploadZone";
 import AnalysisLoader from "@/components/AnalysisLoader";
 import ResultsCard from "@/components/ResultsCard";
 import FaceResultsCard from "@/components/FaceResultsCard";
 import HandsResultsCard from "@/components/HandsResultsCard";
+import VoiceResultsCard from "@/components/VoiceResultsCard";
+import GaitResultsCard from "@/components/GaitResultsCard";
 import ModuleSelector from "@/components/ModuleSelector";
 import Disclaimer from "@/components/Disclaimer";
 import AuthModal from "@/components/AuthModal";
 import { Button } from "@/components/ui/button";
-import { AnalysisMode, AnalysisResult, FaceAnalysisResult, HandAnalysisResult } from "@/types/analysis";
-// supabase client import removed — analyze uses fetch directly for timeout control
+import { AnalysisMode, AnalysisResult, FaceAnalysisResult, HandAnalysisResult, VoiceAnalysisResult, GaitAnalysisResult } from "@/types/analysis";
 import { Scan, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,19 +25,24 @@ const UPLOAD_GUIDANCE: Record<AnalysisMode, string> = {
   body: "Upload a photo showing the full torso (shoulders to hips). For chest analysis, a fitted top or shirtless photo gives the most accurate breast/chest authenticity results.",
   face: "Upload a front-facing photo where the face is clearly visible and unobscured for best results.",
   hands: "Upload a clear photo of the hand(s) with fingers spread. Palm-up or palm-down both work. Include the wrist if possible.",
+  voice: "Upload an audio clip (5–30 seconds) of the person speaking naturally, or record directly with your microphone.",
+  gait: "Upload a short video (5–15 seconds) of the person walking naturally. Side or 45° angle showing the full body works best.",
 };
 
 const LOADER_TEXT: Record<AnalysisMode, { title: string; subtitle: string }> = {
   body: { title: "Analyzing proportions…", subtitle: "AI is examining skeletal structure cues" },
   face: { title: "Analyzing facial features…", subtitle: "AI is examining craniofacial markers" },
   hands: { title: "Analyzing hand anatomy…", subtitle: "AI is examining digit and skeletal cues" },
+  voice: { title: "Analyzing voice patterns…", subtitle: "AI is examining acoustic characteristics" },
+  gait: { title: "Analyzing walking pattern…", subtitle: "AI is examining biomechanical markers" },
 };
 
 const Index = () => {
   const { user, subscription, loading: authLoading, isAdmin } = useAuth();
   const [mode, setMode] = useState<AnalysisMode>("body");
   const [imageBase64, setImageBase64] = useState<string | null>(null);
-  const [result, setResult] = useState<AnalysisResult | FaceAnalysisResult | HandAnalysisResult | null>(null);
+  const [mediaBase64, setMediaBase64] = useState<string | null>(null);
+  const [result, setResult] = useState<AnalysisResult | FaceAnalysisResult | HandAnalysisResult | VoiceAnalysisResult | GaitAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
@@ -59,8 +66,50 @@ const Index = () => {
   // Determine access: subscribed users always have access, non-subscribed get free tries
   const hasAccess = isSubscribed || !freeUsesExhausted;
 
+  const isMediaMode = mode === "voice" || mode === "gait";
+  const currentMedia = isMediaMode ? mediaBase64 : imageBase64;
+
+  const extractVideoFrames = async (videoBase64: string): Promise<string[]> => {
+    return new Promise((resolve) => {
+      const video = document.createElement("video");
+      video.src = videoBase64;
+      video.muted = true;
+      video.playsInline = true;
+
+      video.onloadedmetadata = () => {
+        const duration = video.duration;
+        const frameCount = Math.min(8, Math.max(4, Math.floor(duration * 1.5)));
+        const interval = duration / frameCount;
+        const frames: string[] = [];
+        let currentFrame = 0;
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d")!;
+
+        const captureFrame = () => {
+          if (currentFrame >= frameCount) {
+            resolve(frames);
+            return;
+          }
+          video.currentTime = interval * currentFrame + 0.1;
+        };
+
+        video.onseeked = () => {
+          canvas.width = Math.min(video.videoWidth, 1024);
+          canvas.height = Math.min(video.videoHeight, 1024);
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          frames.push(canvas.toDataURL("image/jpeg", 0.7));
+          currentFrame++;
+          captureFrame();
+        };
+
+        captureFrame();
+      };
+    });
+  };
+
   const handleAnalyze = async () => {
-    if (!imageBase64) return;
+    if (!currentMedia) return;
 
     // If not subscribed and free uses exhausted, prompt signup
     if (!isSubscribed && freeUsesExhausted) {
@@ -79,6 +128,17 @@ const Index = () => {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 120_000); // 2 min timeout
 
+        let requestBody: any = { mode };
+
+        if (mode === "gait") {
+          const frames = await extractVideoFrames(currentMedia);
+          requestBody.frames = frames;
+        } else if (mode === "voice") {
+          requestBody.audio = currentMedia;
+        } else {
+          requestBody.image = currentMedia;
+        }
+
         const response = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-proportions`,
           {
@@ -88,7 +148,7 @@ const Index = () => {
               "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
               "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             },
-            body: JSON.stringify({ image: imageBase64, mode }),
+            body: JSON.stringify(requestBody),
             signal: controller.signal,
           }
         );
@@ -134,6 +194,7 @@ const Index = () => {
 
   const handleReset = () => {
     setImageBase64(null);
+    setMediaBase64(null);
     setResult(null);
     setError(null);
 
@@ -147,6 +208,7 @@ const Index = () => {
     if (newMode !== mode) {
       setMode(newMode);
       setImageBase64(null);
+      setMediaBase64(null);
       setResult(null);
       setError(null);
     }
@@ -161,6 +223,10 @@ const Index = () => {
         return <FaceResultsCard result={result as FaceAnalysisResult} imageBase64={imageBase64!} onReset={handleReset} />;
       case "hands":
         return <HandsResultsCard result={result as HandAnalysisResult} imageBase64={imageBase64!} onReset={handleReset} />;
+      case "voice":
+        return <VoiceResultsCard result={result as VoiceAnalysisResult} onReset={handleReset} />;
+      case "gait":
+        return <GaitResultsCard result={result as GaitAnalysisResult} onReset={handleReset} />;
     }
   };
 
@@ -208,17 +274,26 @@ const Index = () => {
           <>
             <p className="text-center text-xs text-muted-foreground">{UPLOAD_GUIDANCE[mode]}</p>
 
-            <UploadZone
-              onImageSelected={setImageBase64}
-              imagePreview={imageBase64}
-              onClear={() => setImageBase64(null)}
-            />
+            {isMediaMode ? (
+              <MediaUploadZone
+                type={mode === "voice" ? "audio" : "video"}
+                onMediaSelected={setMediaBase64}
+                mediaPreview={mediaBase64}
+                onClear={() => setMediaBase64(null)}
+              />
+            ) : (
+              <UploadZone
+                onImageSelected={setImageBase64}
+                imagePreview={imageBase64}
+                onClear={() => setImageBase64(null)}
+              />
+            )}
 
-            {imageBase64 && (
+            {currentMedia && (
               <div className="flex justify-center">
                 <Button onClick={handleAnalyze} size="lg" className="gap-2 gradient-brand text-primary-foreground">
                   <Scan className="w-4 h-4" />
-                  Analyze {mode === "body" ? "Proportions" : mode === "face" ? "Face" : "Hands"}
+                  Analyze {mode === "body" ? "Proportions" : mode === "face" ? "Face" : mode === "hands" ? "Hands" : mode === "voice" ? "Voice" : "Gait"}
                 </Button>
               </div>
             )}
