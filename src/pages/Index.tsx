@@ -32,7 +32,7 @@ const LOADER_TEXT: Record<AnalysisMode, { title: string; subtitle: string }> = {
 };
 
 const Index = () => {
-  const { user, subscription, loading: authLoading } = useAuth();
+  const { user, subscription, loading: authLoading, isAdmin } = useAuth();
   const [mode, setMode] = useState<AnalysisMode>("body");
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | FaceAnalysisResult | HandAnalysisResult | null>(null);
@@ -42,7 +42,7 @@ const Index = () => {
   const [freeUsesExhausted, setFreeUsesExhausted] = useState(false);
   const { toast } = useToast();
 
-  const isSubscribed = subscription.subscribed;
+  const isSubscribed = subscription.subscribed || isAdmin;
 
   // Check free uses on mount
   useEffect(() => {
