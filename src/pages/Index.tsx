@@ -126,9 +126,9 @@ const Index = () => {
     }
   };
 
-  // Show landing page only if: not authenticated AND free uses exhausted
-  // (first-time visitors go straight to the tool)
-  if (!authLoading && !user && freeUsesExhausted) {
+  // Show landing page only if: free uses exhausted AND no result currently being displayed
+  // (first-time visitors go straight to the tool; results always shown after analysis)
+  if (!authLoading && !user && freeUsesExhausted && !result) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
@@ -138,8 +138,8 @@ const Index = () => {
     );
   }
 
-  // Authenticated but not subscribed and free uses done → landing page
-  if (!authLoading && user && !isSubscribed && freeUsesExhausted) {
+  // Authenticated but not subscribed and free uses done and no result → landing page
+  if (!authLoading && user && !isSubscribed && freeUsesExhausted && !result) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
