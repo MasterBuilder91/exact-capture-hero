@@ -58,8 +58,22 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { image, mode = "body" } = await req.json();
-    if (!image) {
+    const { image, audio, frames, mode = "body" } = await req.json();
+
+    // Validate input based on mode
+    if (mode === "voice" && !audio) {
+      return new Response(JSON.stringify({ error: "No audio provided" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (mode === "gait" && (!frames || !frames.length)) {
+      return new Response(JSON.stringify({ error: "No video frames provided" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (mode !== "voice" && mode !== "gait" && !image) {
       return new Response(JSON.stringify({ error: "No image provided" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -76,6 +90,33 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Build user content based on mode
+    let userContent: any[];
+    if (mode === "voice") {
+      // For voice, send audio as data URL for the AI to analyze
+      userContent = [
+        { type: "text", text: selected.user },
+        { type: "input_audio", input_audio: { data: audio.replace(/^data:audio\/\w+;base64,/, ""), format: "wav" } },
+      ];
+    } else if (mode === "gait") {
+      // For gait, send multiple frames as images
+      userContent = [
+        { type: "text", text: `${selected.user}\n\nThe following ${frames.length} images are sequential frames from a walking video, captured at regular intervals.` },
+        ...frames.map((frame: string, i: number) => ({
+          type: "image_url",
+          image_url: { url: frame },
+        })),
+      ];
+    } else {
+      userContent = [
+        { type: "text", text: selected.user },
+        { type: "image_url", image_url: { url: image } },
+      ];
+    }
+
+    // Choose model — use gemini-2.5-flash for most, but for voice use text-only approach
+    const model = mode === "voice" ? "google/gemini-2.5-flash" : "google/gemini-2.5-flash";
+
     // Run AI analysis (and Rekognition in parallel for face mode)
     const aiPromise = fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -84,16 +125,10 @@ Deno.serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model,
         messages: [
           { role: "system", content: selected.system },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: selected.user },
-              { type: "image_url", image_url: { url: image } },
-            ],
-          },
+          { role: "user", content: userContent },
         ],
         temperature: 0.3,
       }),

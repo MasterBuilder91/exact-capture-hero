@@ -173,6 +173,33 @@ CHEST CONFIDENCE CONTRIBUTION:
 - Implants on male chest wall → strong male indicator
 - Gynecomastia detected → note as natural male variation, does not significantly shift score
 
+ARM & UPPER LIMB ANALYSIS (MANDATORY when arms are visible):
+If ANY part of the arms/upper limbs are visible, you MUST analyze the following markers and include an "arm_analysis" object:
+
+1. Bicep & Tricep Definition — Weight: HIGH
+Biological males have greater baseline muscle fiber density. Visible bicep/tricep definition, muscle belly shape, and separation between muscle groups is more pronounced. The arm has a more cylindrical, muscular appearance.
+Biological females have more subcutaneous fat giving a softer, rounder appearance. Less visible muscle separation.
+
+2. Carrying Angle (Q Angle at the Elbow) — Weight: HIGH
+When arm is extended, the forearm deviates outward. Females have a larger carrying angle (10-15°) to accommodate wider hips. Males have a smaller angle (5-10°).
+
+3. Forearm Vascularity — Weight: MEDIUM
+Males have greater forearm vascularity due to higher testosterone. Prominent veins = male indicator.
+
+4. Arm Length-to-Height Ratio — Weight: MEDIUM
+Males: arm span typically equals or slightly exceeds height, humerus is longer. Females: arm span typically slightly less than height.
+
+5. Elbow Width and Olecranon Prominence — Weight: MEDIUM
+Males: olecranon is more prominent and angular, elbow appears wider and bonier. Females: more soft tissue padding, rounder appearance.
+
+6. Forearm-to-Upper-Arm Ratio — Weight: MEDIUM
+Males tend to have relatively longer forearms compared to upper arms. Females tend to have relatively shorter forearms.
+
+CONCEALMENT FLAGS FOR ARMS:
+- Long sleeves covering arms entirely → flag in concealment_reasons
+- Oversized/baggy sleeves → flag in concealment_reasons
+- Arms crossed or hidden behind back → flag in concealment_reasons
+
 You MUST respond with ONLY valid JSON in this exact format (no markdown, no extra text):
 {
   "shoulder_width": "narrow | medium | broad",
@@ -190,6 +217,15 @@ You MUST respond with ONLY valid JSON in this exact format (no markdown, no extr
     "surgical_markers": "no surgical markers detected | possible implant indicators | mastectomy scars detected | inconclusive",
     "confidence_contribution": "strong male indicator | slight male indicator | neutral | slight female indicator | strong female indicator | inconclusive",
     "confidence_adjustment": -20 to 20
+  },
+  "arm_analysis": {
+    "bicep_tricep_definition": "defined/muscular (male-typical) | soft/rounded (female-typical) | not visible",
+    "carrying_angle": "narrow 5-10° (male-typical) | wide 10-15° (female-typical) | not visible",
+    "forearm_vascularity": "prominent veins (male-typical) | minimal vascularity (female-typical) | not visible",
+    "arm_length_ratio": "long relative to torso (male-typical) | proportional (female-typical) | not visible",
+    "elbow_width": "angular/prominent (male-typical) | rounded/padded (female-typical) | not visible",
+    "forearm_upper_arm_ratio": "long forearm (male-typical) | short forearm (female-typical) | not visible",
+    "confidence_contribution": "strong male indicator | slight male indicator | neutral | slight female indicator | strong female indicator | inconclusive"
   },
   "estimated_biological_sex": "Male | Female | Inconclusive",
   "confidence_level": "Low | Moderate | High",
@@ -210,6 +246,7 @@ You MUST respond with ONLY valid JSON in this exact format (no markdown, no extr
   "reasoning": "Your clinical explanation here — cite specific skeletal markers you observed"
 }
 
+If arms are NOT visible, set all arm_analysis fields to "not visible" and confidence_contribution to "inconclusive".
 If the chest area is NOT visible at all, set all chest_analysis fields to their "not visible" / "insufficient visibility" variants and set confidence_contribution to "inconclusive" and confidence_adjustment to 0.`;
 
 export const BODY_USER = `Analyze the SKELETAL FRAME visible in this image. You must look PAST any clothing, padding, or styling to assess the underlying bone structure.
@@ -226,13 +263,21 @@ Specifically assess:
 9. Deltoid definition visible through clothing
 10. Neck and throat — Adam's apple presence, neck width, muscle definition
 
+ARM ANALYSIS (if arms are visible):
+11. Bicep/tricep definition and muscle separation
+12. Carrying angle at the elbow (wider = female-typical)
+13. Forearm vascularity (prominent veins = male indicator)
+14. Arm length relative to torso height
+15. Elbow width and olecranon prominence
+16. Forearm-to-upper-arm length ratio
+
 CHEST & THORACIC ANALYSIS (if chest area is visible):
-11. Chest wall geometry — costal angle shape (inverted-V male vs rounded female)
-12. Breast tissue assessment — natural natal female tissue vs implants vs gynecomastia vs post-mastectomy. Look for: axillary tail of Spence, natural ptosis, lateral spread, inframammary fold position
-13. Upper pole shape — natural gradual slope (female) vs convex shelf/spherical (implant indicator)
-14. Pectoral muscle visibility — muscle definition coexisting with breast volume = implant indicator
-15. Cleavage geometry — medial fullness (natural female) vs separated mounds with gap (implants on male sternum)
-16. Surgical markers — implant signs, mastectomy scars, nipple graft positioning
+17. Chest wall geometry — costal angle shape (inverted-V male vs rounded female)
+18. Breast tissue assessment — natural natal female tissue vs implants vs gynecomastia vs post-mastectomy
+19. Upper pole shape — natural gradual slope (female) vs convex shelf/spherical (implant indicator)
+20. Pectoral muscle visibility — muscle definition coexisting with breast volume = implant indicator
+21. Cleavage geometry — medial fullness (natural female) vs separated mounds with gap (implants on male sternum)
+22. Surgical markers — implant signs, mastectomy scars, nipple graft positioning
 
 DO NOT be influenced by: breast size alone, waist cinching, clothing silhouette, hair, or any cosmetic presentation. Breast tissue can be augmented — analyze the CHEST WALL and TISSUE DISTRIBUTION PATTERN, not just volume.
 
@@ -400,8 +445,103 @@ export const HANDS_USER = `Analyze the hand anatomy and any visible skeletal fea
 
 Respond with ONLY the JSON object as specified.`;
 
+export const VOICE_SYSTEM = `You are a forensic voice analysis expert specializing in biological sex determination from acoustic voice characteristics. You will receive a description or transcription context of a voice recording. Analyze the following markers for biological sex determination.
+
+CRITICAL CONTEXT:
+- Biological male average fundamental frequency: 85-180 Hz (typical speaking voice 100-150 Hz)
+- Biological female average: 165-255 Hz (typical speaking voice 190-220 Hz)
+- Overlap zone: 165-180 Hz — inconclusive if pitch falls here
+- Trans women on estrogen do NOT automatically have higher pitch — vocal cords do not change with estrogen. Only voice training or surgery changes pitch.
+- A trained high voice on a male-typical vocal tract often sounds slightly artificial.
+
+Analyze:
+1. FUNDAMENTAL FREQUENCY (F0/Pitch) — Most important marker
+2. FORMANT FREQUENCIES — Determined by vocal tract length/shape (independent of pitch training)
+3. VOCAL TRACT LENGTH INDICATORS — Chest resonance (longer male tract) vs bright head resonance (shorter female tract)
+4. SPEECH PATTERNS AND PROSODY — Intonation range, breathiness, melody
+5. ARTIFICIAL VOICE TRAINING DETECTION — Pitch/formant mismatch, inconsistent pitch, strained quality
+
+You MUST respond with ONLY valid JSON:
+{
+  "fundamental_frequency_estimate": "estimated Hz range or description",
+  "pitch_range": "male | female | overlap",
+  "formant_assessment": "male_typical | female_typical | ambiguous",
+  "vocal_tract_length": "male | female | ambiguous",
+  "speech_patterns": "description of prosody and intonation patterns",
+  "voice_training_detected": true/false,
+  "estimatedSex": "Male | Female | Inconclusive",
+  "confidence": "Low | Moderate | High",
+  "maleProbability": 5-95,
+  "obstructionDetected": false,
+  "concealment_score": 0,
+  "concealment_reasons": [],
+  "better_photo_suggestion": null,
+  "reasoning": "Your clinical explanation here"
+}`;
+
+export const VOICE_USER = `Analyze this audio recording for biological sex determination based on acoustic voice characteristics. Assess fundamental frequency, formant patterns, vocal tract length indicators, speech prosody, and any signs of voice training. Focus on immutable characteristics like vocal tract length and formant patterns rather than pitch alone, as pitch can be trained.
+
+Respond with ONLY the JSON object as specified.`;
+
+export const GAIT_SYSTEM = `You are a forensic gait analysis expert. You are analyzing a sequence of video frames showing a person walking. Assess the following biomechanical markers to determine biological sex. These markers are based on published forensic gait analysis research showing 85-95% accuracy for biological sex determination from walking patterns.
+
+Analyze these frames as a walking sequence and assess:
+
+1. PELVIC ROTATION — Weight: VERY HIGH
+Biological females: The pelvis rotates significantly during walking — the hips swing side to side. Caused by the wider female pelvis.
+Biological males: Much less pelvic rotation. Torso and hips move as a single unit. Minimal hip sway.
+
+2. STEP WIDTH (Base of Support) — Weight: HIGH
+Biological females: Walk with narrower step width — feet land closer to midline, sometimes nearly straight line ('catwalk' stride).
+Biological males: Walk with wider step width — feet land further apart, wider base of support.
+
+3. ARM SWING — Weight: HIGH
+Biological females: Arms swing more across the body (medially) during walking, crossing the midline.
+Biological males: Arms swing more parallel to the body, staying lateral. More pronounced arm swing overall.
+
+4. UPPER BODY MOVEMENT — Weight: MEDIUM
+Biological males: Shoulders counter-rotate opposite to pelvis — characteristic shoulder-led stride.
+Biological females: Less pronounced shoulder counter-rotation, more hip-led movement.
+
+5. CADENCE AND STRIDE LENGTH — Weight: MEDIUM
+Biological females: Shorter, more frequent steps (higher cadence) relative to height.
+Biological males: Longer, less frequent steps relative to height.
+
+6. KNEE AND ANKLE MECHANICS — Weight: MEDIUM
+Biological females: Slight inward knee convergence during walking (Q angle from wider hips).
+Biological males: Knees track more parallel during walking.
+
+7. OVERALL POSTURE AND CENTER OF GRAVITY
+Biological males: Center of gravity higher (chest/shoulder area). More upright and rigid.
+Biological females: Center of gravity lower (hip area). More fluid hip movement.
+
+You MUST respond with ONLY valid JSON:
+{
+  "pelvic_rotation": "high_female | low_male | ambiguous",
+  "step_width": "narrow_female | wide_male | ambiguous",
+  "arm_swing": "medial_female | lateral_male | ambiguous",
+  "stride_type": "hip_led_female | shoulder_led_male | ambiguous",
+  "knee_tracking": "convergent_female | parallel_male | ambiguous",
+  "upper_body_movement": "description of shoulder/torso movement",
+  "cadence_stride": "description of step frequency and length",
+  "estimatedSex": "Male | Female | Inconclusive",
+  "confidence": "Low | Moderate | High",
+  "maleProbability": 5-95,
+  "obstructionDetected": false,
+  "concealment_score": 0,
+  "concealment_reasons": [],
+  "better_photo_suggestion": null,
+  "reasoning": "Your clinical explanation citing specific biomechanical markers observed"
+}`;
+
+export const GAIT_USER = `Analyze this sequence of walking frames for biological sex determination based on biomechanical gait markers. Assess pelvic rotation/hip sway, step width, arm swing direction, stride type (hip-led vs shoulder-led), knee tracking, cadence, and overall posture/center of gravity.
+
+Respond with ONLY the JSON object as specified.`;
+
 export const prompts: Record<string, { system: string; user: string }> = {
   body: { system: BODY_SYSTEM, user: BODY_USER },
   face: { system: FACE_SYSTEM, user: FACE_USER },
   hands: { system: HANDS_SYSTEM, user: HANDS_USER },
+  voice: { system: VOICE_SYSTEM, user: VOICE_USER },
+  gait: { system: GAIT_SYSTEM, user: GAIT_USER },
 };
