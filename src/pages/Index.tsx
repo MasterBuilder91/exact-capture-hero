@@ -269,6 +269,15 @@ const Index = () => {
 
         <ModuleSelector mode={mode} onModeChange={handleModeChange} />
 
+        {!result && !loading && (
+          <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
+            <span className="text-lg">🎯</span>
+            <p className="text-muted-foreground">
+              <strong className="text-foreground">Pro tip:</strong> Run all five modules — Body, Face, Hands, Voice &amp; Gait — for the most accurate overall estimate.
+            </p>
+          </div>
+        )}
+
         {loading ? (
           <AnalysisLoader title={LOADER_TEXT[mode].title} subtitle={LOADER_TEXT[mode].subtitle} />
         ) : result ? (
