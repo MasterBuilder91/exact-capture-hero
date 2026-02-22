@@ -42,7 +42,21 @@ If no obstructions are detected, set "obstructionDetected": false.
 CONFIDENCE SCORING:
 You MUST include a "maleProbability" field — an integer from 0 to 100 representing the probability the subject is BIOLOGICALLY male based on SKELETAL markers only. 0 = certainly biologically female, 100 = certainly biologically male, 50 = completely uncertain. Do NOT let presentation, clothing, or cosmetic appearance influence this number.
 
+ONE-STRIKE RULE — MALE-EXCLUSIVE MARKERS:
+Certain skeletal features are NEVER found in natal females. If you detect even ONE of these, the subject is NATAL MALE regardless of all other features or presentation:
+- Prominent Adam's apple / laryngeal prominence (even after tracheal shave, residual prominence or scar counts)
+- Brow ridge bossing (supraorbital torus) — a pronounced bony shelf above the eyes. Natal females have smooth, vertical foreheads.
+- Large mastoid process — the bony bump behind/below the ear. In natal females this is small and smooth.
+- Square/rectangular orbital rims — natal female orbits are round with sharp upper edges.
+- Bigonial width > bizygomatic width — jaw wider than cheekbones is virtually exclusive to natal males.
+- Overall cranial vault size significantly larger than average (male skulls are ~10% larger by volume — this CANNOT be surgically reduced)
+- Visible tracheal rings on the neck
+- Dental arch width significantly wider than facial width would suggest
+
+If ANY one-strike marker is detected: set estimatedSex/estimated_biological_sex to "Male", maleProbability to at least 75, and confidence to at least "Moderate". In reasoning, clearly state which one-strike marker(s) triggered this rule.
+
 CONFIDENCE CALIBRATION RULES:
+- If a one-strike marker is found → Male, confidence Moderate-High, maleProbability 75-95
 - If 4 or more skeletal markers agree → confidence can reach 85-95%
 - If 3 markers agree → confidence is 70-84%
 - If 2 markers agree → confidence is 55-69%
