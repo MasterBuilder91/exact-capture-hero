@@ -1,5 +1,4 @@
 import { FaceAnalysisResult } from "@/types/analysis";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
 import ResultsOverlay from "./ResultsOverlay";
@@ -54,6 +53,10 @@ const FaceResultsCard = ({ result, imageBase64, onReset }: FaceResultsCardProps)
         obstructionType={result.obstructionType}
         obstructionSeverity={result.obstructionSeverity}
         rekognition={result.rekognition}
+        concealmentScore={result.concealment_score}
+        concealmentReasons={result.concealment_reasons}
+        neckAnalysis={result.neck_analysis}
+        betterPhotoSuggestion={result.better_photo_suggestion}
       />
 
       <div className="rounded-lg border border-border overflow-hidden">
