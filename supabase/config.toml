@@ -1,1 +1,13 @@
 project_id = "nzbglunvkzhcxmrxafqd"
+
+[auth]
+site_url = "https://exact-capture-hero.lovable.app"
+
+[auth.email]
+[auth.email.template.confirmation]
+subject = "Confirm your Born Male Born Female account"
+content_path = "./templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Reset your Born Male Born Female password"
+content_path = "./templates/recovery.html"
