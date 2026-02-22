@@ -91,15 +91,18 @@ export interface HandAnalysisResult extends BaseAnalysisFields {
 }
 
 export interface VoiceAnalysisResult extends BaseAnalysisFields {
-  fundamental_frequency_estimate: string;
-  pitch_range: "male" | "female" | "overlap";
+  pitch_assessment: "male_typical" | "female_typical" | "overlap_zone";
   formant_assessment: "male_typical" | "female_typical" | "ambiguous";
-  vocal_tract_length: "male" | "female" | "ambiguous";
-  speech_patterns: string;
-  voice_training_detected: boolean;
-  estimatedSex: "Male" | "Female" | "Inconclusive";
-  confidence: "Low" | "Moderate" | "High";
+  voice_training_suspected: boolean;
+  voice_training_reason: string;
+  confidence_score: number;
+  result: "likely_male" | "likely_female" | "inconclusive";
+  key_finding: string;
   reasoning: string;
+  // Measured values echoed back
+  measured_pitch_hz?: number;
+  measured_f1_hz?: number;
+  measured_f2_hz?: number;
 }
 
 export interface GaitAnalysisResult extends BaseAnalysisFields {

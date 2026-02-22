@@ -1,6 +1,6 @@
 import { VoiceAnalysisResult } from "@/types/analysis";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, AlertTriangle } from "lucide-react";
+import { RotateCcw, AlertTriangle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface VoiceResultsCardProps {
@@ -8,48 +8,57 @@ interface VoiceResultsCardProps {
   onReset: () => void;
 }
 
-const formatValue = (val: string) => val.replace(/_/g, " ");
-
 const VoiceResultsCard = ({ result, onReset }: VoiceResultsCardProps) => {
-  const sexColor = {
-    Male: "bg-result-male",
-    Female: "bg-result-female",
-    Inconclusive: "bg-result-inconclusive",
-  }[result.estimatedSex];
+  const resultMap: Record<string, { label: string; color: string }> = {
+    likely_male: { label: "Likely Male", color: "bg-result-male" },
+    likely_female: { label: "Likely Female", color: "bg-result-female" },
+    inconclusive: { label: "Inconclusive", color: "bg-result-inconclusive" },
+  };
 
-  const sexLabel = {
-    Male: "Likely Male",
-    Female: "Likely Female",
-    Inconclusive: "Inconclusive",
-  }[result.estimatedSex];
+  const { label: sexLabel, color: sexColor } = resultMap[result.result] || resultMap.inconclusive;
 
-  const confidenceColor = {
-    High: "bg-confidence-high",
-    Moderate: "bg-confidence-moderate",
-    Low: "bg-confidence-low",
-  }[result.confidence];
-
+  const confidencePercent = result.confidence_score ?? 50;
   const probPercent = result.maleProbability ?? 50;
 
+  const pitchLabel = {
+    male_typical: "Male Typical",
+    female_typical: "Female Typical",
+    overlap_zone: "Overlap Zone",
+  }[result.pitch_assessment] || result.pitch_assessment;
+
+  const formantLabel = {
+    male_typical: "Male Typical",
+    female_typical: "Female Typical",
+    ambiguous: "Ambiguous",
+  }[result.formant_assessment] || result.formant_assessment;
+
   const rows: [string, string][] = [
-    ["Fundamental Frequency", result.fundamental_frequency_estimate],
-    ["Pitch Range", formatValue(result.pitch_range)],
-    ["Formant Assessment", formatValue(result.formant_assessment)],
-    ["Vocal Tract Length", formatValue(result.vocal_tract_length)],
-    ["Speech Patterns", result.speech_patterns],
-    ["Voice Training Detected", result.voice_training_detected ? "Yes — suspected" : "No"],
+    ["Measured Pitch (F0)", result.measured_pitch_hz ? `${result.measured_pitch_hz.toFixed(1)} Hz` : "N/A"],
+    ["Pitch Assessment", pitchLabel],
+    ["Vocal Tract Resonance (Formants)", formantLabel],
+    ["F1 Formant", result.measured_f1_hz ? `${result.measured_f1_hz.toFixed(0)} Hz` : "N/A"],
+    ["F2 Formant", result.measured_f2_hz ? `${result.measured_f2_hz.toFixed(0)} Hz` : "N/A"],
+    ["Voice Training Detected", result.voice_training_suspected ? "Yes — suspected" : "No"],
   ];
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
+      {/* Privacy info box */}
+      <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 flex items-start gap-3">
+        <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          🔬 This module measures real acoustic data from your audio file — fundamental frequency, formant frequencies, and spectral characteristics — using your browser's built-in audio processing. No audio is stored or transmitted. Only the extracted measurements are sent for analysis.
+        </p>
+      </div>
+
       {/* Result header */}
       <div className="rounded-lg border border-border p-5 bg-card space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className={cn("px-5 py-2 rounded-full text-base font-bold tracking-wide uppercase text-primary-foreground", sexColor)}>
             {sexLabel}
           </span>
-          <span className={cn("px-3 py-1 rounded-full text-xs font-medium text-primary-foreground", confidenceColor)}>
-            {result.confidence} Confidence
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+            {confidencePercent}% Confidence
           </span>
         </div>
 
@@ -71,11 +80,20 @@ const VoiceResultsCard = ({ result, onReset }: VoiceResultsCardProps) => {
           </div>
         </div>
 
-        {result.voice_training_detected && (
-          <div className="rounded-lg border border-accent/50 bg-accent/10 px-3 py-2 flex items-center gap-2">
-            <AlertTriangle className="w-3.5 h-3.5 text-accent" />
-            <span className="text-xs text-accent-foreground">Voice training suspected — pitch may not reflect natal vocal cords</span>
+        {result.voice_training_suspected && (
+          <div className="rounded-lg border border-accent/50 bg-accent/10 px-3 py-2 flex items-start gap-2">
+            <AlertTriangle className="w-3.5 h-3.5 text-accent mt-0.5" />
+            <div className="space-y-0.5">
+              <span className="text-xs font-medium text-accent-foreground">Voice training suspected</span>
+              {result.voice_training_reason && (
+                <p className="text-xs text-muted-foreground">{result.voice_training_reason}</p>
+              )}
+            </div>
           </div>
+        )}
+
+        {result.key_finding && (
+          <p className="text-sm font-medium text-foreground">{result.key_finding}</p>
         )}
 
         <p className="text-xs text-muted-foreground leading-relaxed">{result.reasoning}</p>
@@ -87,7 +105,7 @@ const VoiceResultsCard = ({ result, onReset }: VoiceResultsCardProps) => {
           <thead>
             <tr className="bg-muted">
               <th className="text-left px-4 py-2.5 font-medium text-muted-foreground text-xs uppercase tracking-wider">Marker</th>
-              <th className="text-right px-4 py-2.5 font-medium text-muted-foreground text-xs uppercase tracking-wider">Assessment</th>
+              <th className="text-right px-4 py-2.5 font-medium text-muted-foreground text-xs uppercase tracking-wider">Measurement</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
