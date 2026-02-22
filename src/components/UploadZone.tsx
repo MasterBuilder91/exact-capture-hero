@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react";
-import { Upload, ImageIcon, X } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { Upload, Camera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ interface UploadZoneProps {
 
 const UploadZone = ({ onImageSelected, imagePreview, onClear, disabled }: UploadZoneProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const processFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) return;
@@ -52,31 +53,51 @@ const UploadZone = ({ onImageSelected, imagePreview, onClear, disabled }: Upload
   }
 
   return (
-    <label
-      onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-      onDragLeave={() => setIsDragging(false)}
-      onDrop={handleDrop}
-      className={cn(
-        "flex flex-col items-center justify-center gap-4 p-10 rounded-lg border-2 border-dashed cursor-pointer transition-all duration-200 max-w-md mx-auto",
-        isDragging
-          ? "border-primary bg-primary/5 glow-teal"
-          : "border-border hover:border-primary/50 hover:bg-muted/50"
-      )}
-    >
-      <div className="p-3 rounded-full bg-primary/10">
-        <Upload className="w-6 h-6 text-primary" />
-      </div>
-      <div className="text-center space-y-1">
-        <p className="text-sm font-medium text-foreground">Drop an image here or click to upload</p>
-        <p className="text-xs text-muted-foreground">JPG, PNG, or WEBP</p>
-      </div>
+    <div className="max-w-md mx-auto space-y-3">
+      <label
+        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={handleDrop}
+        className={cn(
+          "flex flex-col items-center justify-center gap-4 p-10 rounded-lg border-2 border-dashed cursor-pointer transition-all duration-200",
+          isDragging
+            ? "border-primary bg-primary/5 glow-teal"
+            : "border-border hover:border-primary/50 hover:bg-muted/50"
+        )}
+      >
+        <div className="p-3 rounded-full bg-primary/10">
+          <Upload className="w-6 h-6 text-primary" />
+        </div>
+        <div className="text-center space-y-1">
+          <p className="text-sm font-medium text-foreground">Drop an image here or click to upload</p>
+          <p className="text-xs text-muted-foreground">JPG, PNG, or WEBP</p>
+        </div>
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleFileInput}
+          className="hidden"
+        />
+      </label>
+
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full gap-2"
+        onClick={() => cameraInputRef.current?.click()}
+      >
+        <Camera className="w-4 h-4" />
+        Take a Photo
+      </Button>
       <input
+        ref={cameraInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/*"
+        capture="environment"
         onChange={handleFileInput}
         className="hidden"
       />
-    </label>
+    </div>
   );
 };
 
