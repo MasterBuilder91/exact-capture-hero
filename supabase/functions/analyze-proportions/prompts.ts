@@ -116,6 +116,52 @@ ENHANCED SHOULDER ANALYSIS:
 
 IMPORTANT: Breast tissue, fat distribution, and waist cinching can ALL be artificially modified. Do NOT rely on these. Focus on the BONE FRAME underneath.
 
+CHEST & THORACIC ANALYSIS (MANDATORY when chest area is visible):
+If ANY part of the chest/thorax is visible (even through fitted clothing), you MUST analyze the following markers and include a "chest_analysis" object in your response.
+
+MARKER 1 — Chest Wall Geometry:
+The underlying rib cage and sternum shape differ significantly between biological males and females regardless of breast tissue:
+- In biological females: chest wall is narrower relative to pelvis, sternum is shorter, costal angle (where ribs meet sternum) is wider — typically >70 degrees. Creates a softer, more rounded lower chest shape.
+- In biological males: chest wall is wider relative to pelvis, sternum is longer, costal angle is narrower — typically <70 degrees. Creates a more angular, inverted-V shape at the bottom of the rib cage.
+- This geometry is visible even through fitted clothing and CANNOT be altered by implants, hormones, or surgery.
+
+MARKER 2 — Breast Tissue Distribution (Natal Female):
+Natural breast tissue in biological females has specific characteristics that are difficult to replicate:
+- Breast tissue originates from the axillary (armpit) region — natal female breasts show a subtle fullness toward the armpit called the "axillary tail of Spence."
+- The inframammary fold (crease where breast meets chest wall) in natal females sits at the level of the 5th or 6th rib — a natural anatomical structure.
+- Natal female breast tissue moves and drapes naturally with gravity — visible as natural ptosis (droop) and lateral spread when arms are raised.
+- The nipple-areola complex in natal females is typically at or slightly below the midpoint of the upper arm; areola tends to be larger relative to the breast mound.
+
+MARKER 3 — Implant Detection Markers:
+Breast implants on biological males have specific visual signatures:
+- Placement geometry: Implants on a male chest sit higher and more lateral because the pectoral muscle is larger and more developed.
+- Roundness and projection: Implants — especially round — have an unnaturally spherical upper pole. Natural female breasts have a gradual slope from collarbone to nipple (upper pole), while implants create a visible shelf or convex curve.
+- Lateral displacement: Implants tend to stay in place or move unnaturally when leaning because they are constrained by the implant pocket. Natural tissue spreads laterally and flattens.
+- Skin stretching: Implants on a male chest often show visible skin tension lines or tightness in the upper pole.
+- Pectoral muscle visibility: In males with implants, pectoral muscle is often visible above or around the implant, especially when arms are raised or chest is flexed. Muscle definition coexisting with breast volume does NOT occur in natal females.
+- Inframammary fold position: In males with implants, the fold is surgically created and may sit at an atypical position — either too high or differently than the natural female fold.
+- Cleavage geometry: Natural female cleavage is created by tissue pressing together medially. Implant cleavage on a male chest appears as two separate rounded mounds with a gap, because the male sternum is wider and pectoral muscle separates the implants.
+
+MARKER 4 — Post-Mastectomy Chest (Trans Male):
+Biological females who have undergone top surgery have specific characteristics:
+- Surgical scars: Double incision mastectomy leaves horizontal scars across the lower chest, from lateral chest to sternum. Visible shirtless and sometimes through fitted clothing.
+- Nipple graft positioning: After top surgery, nipples are repositioned as free grafts — often placed higher and further apart than typical male nipples. Areola is often reduced in size and may differ in texture/color.
+- Residual contour: The chest wall may retain subtle contour differences from the underlying female rib cage — wider costal angle and shorter sternum still present.
+- Chest muscle development: Trans males on testosterone develop pectoral muscle definition, but underlying chest wall geometry (costal angle, sternum length) remains female-typical.
+
+MARKER 5 — Gynecomastia vs. Implants vs. Natural:
+Biological males can develop gynecomastia (natural male breast tissue growth) which differs from implants:
+- Gynecomastia presents as softer, less defined tissue centered around the nipple-areola complex, often puffy or conical rather than rounded like implants.
+- The tissue is concentrated in the subareolar region rather than distributed across the chest like female tissue or projecting like implants.
+- Gynecomastia should NOT be confused with female breasts — it is a male variation that does not significantly shift the sex score.
+
+CHEST CONFIDENCE CONTRIBUTION:
+- Male-typical chest wall geometry AND implants detected → strong male indicator, increase maleProbability by up to 20 points
+- Female-typical chest wall geometry AND natural tissue detected → strong female indicator, increase female confidence by up to 20 points
+- Mastectomy scars detected → strong biological female indicator regardless of current presentation
+- Implants on male chest wall → strong male indicator
+- Gynecomastia detected → note as natural male variation, does not significantly shift score
+
 You MUST respond with ONLY valid JSON in this exact format (no markdown, no extra text):
 {
   "shoulder_width": "narrow | medium | broad",
@@ -124,6 +170,16 @@ You MUST respond with ONLY valid JSON in this exact format (no markdown, no extr
   "clavicle_angle": "horizontal (male-typical) | angled downward (female-typical) | not visible",
   "shoulder_neck_ratio": "wide (male-typical) | proportional | narrow (female-typical) | not visible",
   "deltoid_definition": "defined (male-typical) | smooth (female-typical) | not visible",
+  "chest_analysis": {
+    "chest_wall_geometry": "male-typical (narrow costal angle) | female-typical (wide costal angle) | partially obscured | not visible",
+    "breast_tissue_assessment": "consistent with natal female tissue | consistent with implants | consistent with post-mastectomy | consistent with gynecomastia | insufficient visibility",
+    "upper_pole_shape": "natural slope (female-typical) | convex shelf (implant indicator) | flat/muscular (male-typical) | not visible",
+    "inframammary_fold": "natural anatomical position | surgically positioned | not visible",
+    "pectoral_muscle_visibility": "not visible | visible alongside breast volume (implant indicator) | visible, no breast volume (male-typical)",
+    "surgical_markers": "no surgical markers detected | possible implant indicators | mastectomy scars detected | inconclusive",
+    "confidence_contribution": "strong male indicator | slight male indicator | neutral | slight female indicator | strong female indicator | inconclusive",
+    "confidence_adjustment": -20 to 20
+  },
   "estimated_biological_sex": "Male | Female | Inconclusive",
   "confidence_level": "Low | Moderate | High",
   "maleProbability": 5-95,
@@ -141,7 +197,9 @@ You MUST respond with ONLY valid JSON in this exact format (no markdown, no extr
   },
   "better_photo_suggestion": "suggestion string or null",
   "reasoning": "Your clinical explanation here — cite specific skeletal markers you observed"
-}`;
+}
+
+If the chest area is NOT visible at all, set all chest_analysis fields to their "not visible" / "insufficient visibility" variants and set confidence_contribution to "inconclusive" and confidence_adjustment to 0.`;
 
 export const BODY_USER = `Analyze the SKELETAL FRAME visible in this image. You must look PAST any clothing, padding, or styling to assess the underlying bone structure.
 
@@ -157,7 +215,15 @@ Specifically assess:
 9. Deltoid definition visible through clothing
 10. Neck and throat — Adam's apple presence, neck width, muscle definition
 
-DO NOT be influenced by: breast size, waist cinching, clothing silhouette, hair, or any cosmetic presentation.
+CHEST & THORACIC ANALYSIS (if chest area is visible):
+11. Chest wall geometry — costal angle shape (inverted-V male vs rounded female)
+12. Breast tissue assessment — natural natal female tissue vs implants vs gynecomastia vs post-mastectomy. Look for: axillary tail of Spence, natural ptosis, lateral spread, inframammary fold position
+13. Upper pole shape — natural gradual slope (female) vs convex shelf/spherical (implant indicator)
+14. Pectoral muscle visibility — muscle definition coexisting with breast volume = implant indicator
+15. Cleavage geometry — medial fullness (natural female) vs separated mounds with gap (implants on male sternum)
+16. Surgical markers — implant signs, mastectomy scars, nipple graft positioning
+
+DO NOT be influenced by: breast size alone, waist cinching, clothing silhouette, hair, or any cosmetic presentation. Breast tissue can be augmented — analyze the CHEST WALL and TISSUE DISTRIBUTION PATTERN, not just volume.
 
 Respond with ONLY the JSON object as specified.`;
 

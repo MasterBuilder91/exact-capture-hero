@@ -21,6 +21,18 @@ interface BaseAnalysisFields {
   better_photo_suggestion?: string | null;
 }
 
+// Chest analysis sub-object
+export interface ChestAnalysis {
+  chest_wall_geometry: string;
+  breast_tissue_assessment: string;
+  upper_pole_shape: string;
+  inframammary_fold: string;
+  pectoral_muscle_visibility: string;
+  surgical_markers: string;
+  confidence_contribution: string;
+  confidence_adjustment: number;
+}
+
 export interface AnalysisResult extends BaseAnalysisFields {
   shoulder_width: string;
   hip_width: string;
@@ -28,6 +40,7 @@ export interface AnalysisResult extends BaseAnalysisFields {
   clavicle_angle?: string;
   shoulder_neck_ratio?: string;
   deltoid_definition?: string;
+  chest_analysis?: ChestAnalysis;
   estimated_biological_sex: "Male" | "Female" | "Inconclusive";
   confidence_level: "Low" | "Moderate" | "High";
   reasoning: string;
