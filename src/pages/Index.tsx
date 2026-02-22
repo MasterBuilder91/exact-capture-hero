@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import LandingPage from "@/components/LandingPage";
@@ -9,11 +9,15 @@ import FaceResultsCard from "@/components/FaceResultsCard";
 import HandsResultsCard from "@/components/HandsResultsCard";
 import ModuleSelector from "@/components/ModuleSelector";
 import Disclaimer from "@/components/Disclaimer";
+import AuthModal from "@/components/AuthModal";
 import { Button } from "@/components/ui/button";
 import { AnalysisMode, AnalysisResult, FaceAnalysisResult, HandAnalysisResult } from "@/types/analysis";
 import { supabase } from "@/integrations/supabase/client";
-import { Scan } from "lucide-react";
+import { Scan, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const FREE_USES_KEY = "bmbf_free_uses";
+const MAX_FREE_USES = 1;
 
 const UPLOAD_GUIDANCE: Record<AnalysisMode, string> = {
   body: "Upload a photo showing the full torso (shoulders to hips) for best results.",
@@ -34,12 +38,36 @@ const Index = () => {
   const [result, setResult] = useState<AnalysisResult | FaceAnalysisResult | HandAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [freeUsesExhausted, setFreeUsesExhausted] = useState(false);
   const { toast } = useToast();
 
   const isSubscribed = subscription.subscribed;
 
+  // Check free uses on mount
+  useEffect(() => {
+    const uses = parseInt(localStorage.getItem(FREE_USES_KEY) || "0", 10);
+    setFreeUsesExhausted(uses >= MAX_FREE_USES);
+  }, []);
+
+  const incrementFreeUses = () => {
+    const uses = parseInt(localStorage.getItem(FREE_USES_KEY) || "0", 10) + 1;
+    localStorage.setItem(FREE_USES_KEY, String(uses));
+    if (uses >= MAX_FREE_USES) setFreeUsesExhausted(true);
+  };
+
+  // Determine access: subscribed users always have access, non-subscribed get free tries
+  const hasAccess = isSubscribed || !freeUsesExhausted;
+
   const handleAnalyze = async () => {
     if (!imageBase64) return;
+
+    // If not subscribed and free uses exhausted, prompt signup
+    if (!isSubscribed && freeUsesExhausted) {
+      setAuthOpen(true);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -52,6 +80,11 @@ const Index = () => {
       if (data?.error) throw new Error(data.error);
 
       setResult(data);
+
+      // Count free use if not subscribed
+      if (!isSubscribed) {
+        incrementFreeUses();
+      }
     } catch (err: any) {
       const msg = err?.message || "Analysis failed. Please try again with a clearer photo.";
       setError(msg);
@@ -65,12 +98,19 @@ const Index = () => {
     setImageBase64(null);
     setResult(null);
     setError(null);
+
+    // If free uses exhausted and not subscribed, show signup prompt
+    if (!isSubscribed && freeUsesExhausted) {
+      setAuthOpen(true);
+    }
   };
 
   const handleModeChange = (newMode: AnalysisMode) => {
     if (newMode !== mode) {
       setMode(newMode);
-      handleReset();
+      setImageBase64(null);
+      setResult(null);
+      setError(null);
     }
   };
 
@@ -86,7 +126,20 @@ const Index = () => {
     }
   };
 
-  if (!authLoading && (!user || !isSubscribed)) {
+  // Show landing page only if: not authenticated AND free uses exhausted
+  // (first-time visitors go straight to the tool)
+  if (!authLoading && !user && freeUsesExhausted) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <LandingPage />
+        <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
+      </div>
+    );
+  }
+
+  // Authenticated but not subscribed and free uses done → landing page
+  if (!authLoading && user && !isSubscribed && freeUsesExhausted) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
@@ -102,6 +155,9 @@ const Index = () => {
         <div className="text-center space-y-2">
           <h1 className="font-display text-3xl font-bold gradient-brand-text">Born Male Born Female</h1>
           <p className="text-sm text-muted-foreground">Everyone has the right to know.</p>
+          {!isSubscribed && !freeUsesExhausted && (
+            <p className="text-xs text-accent font-medium">✨ Try one free analysis — no signup required</p>
+          )}
         </div>
 
         <ModuleSelector mode={mode} onModeChange={handleModeChange} />
@@ -109,7 +165,24 @@ const Index = () => {
         {loading ? (
           <AnalysisLoader title={LOADER_TEXT[mode].title} subtitle={LOADER_TEXT[mode].subtitle} />
         ) : result ? (
-          renderResults()
+          <>
+            {renderResults()}
+            {!isSubscribed && freeUsesExhausted && (
+              <div className="rounded-xl border border-border bg-card p-6 text-center space-y-3">
+                <Lock className="w-8 h-8 text-primary mx-auto" />
+                <h3 className="font-display font-semibold text-lg">Want unlimited analyses?</h3>
+                <p className="text-sm text-muted-foreground">
+                  Sign up now and start your 3-day free trial — only $5/week after.
+                </p>
+                <Button
+                  className="gradient-brand text-primary-foreground"
+                  onClick={() => setAuthOpen(true)}
+                >
+                  Sign Up to Continue
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
           <>
             <p className="text-center text-xs text-muted-foreground">{UPLOAD_GUIDANCE[mode]}</p>
@@ -137,6 +210,8 @@ const Index = () => {
 
         <Disclaimer />
       </main>
+
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
     </div>
   );
 };
