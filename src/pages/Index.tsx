@@ -12,7 +12,7 @@ import Disclaimer from "@/components/Disclaimer";
 import AuthModal from "@/components/AuthModal";
 import { Button } from "@/components/ui/button";
 import { AnalysisMode, AnalysisResult, FaceAnalysisResult, HandAnalysisResult } from "@/types/analysis";
-import { supabase } from "@/integrations/supabase/client";
+// supabase client import removed — analyze uses fetch directly for timeout control
 import { Scan, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -71,27 +71,65 @@ const Index = () => {
     setLoading(true);
     setError(null);
 
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke("analyze-proportions", {
-        body: { image: imageBase64, mode },
-      });
+    const MAX_RETRIES = 2;
+    let lastError: string | null = null;
 
-      if (fnError) throw fnError;
-      if (data?.error) throw new Error(data.error);
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 120_000); // 2 min timeout
 
-      setResult(data);
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-proportions`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+            body: JSON.stringify({ image: imageBase64, mode }),
+            signal: controller.signal,
+          }
+        );
+        clearTimeout(timeout);
 
-      // Count free use if not subscribed
-      if (!isSubscribed) {
-        incrementFreeUses();
+        if (!response.ok) {
+          const errBody = await response.text();
+          throw new Error(errBody || `Server error (${response.status})`);
+        }
+
+        const data = await response.json();
+        if (data?.error) throw new Error(data.error);
+
+        setResult(data);
+
+        // Count free use if not subscribed
+        if (!isSubscribed) {
+          incrementFreeUses();
+        }
+        lastError = null;
+        break; // success — exit retry loop
+      } catch (err: any) {
+        const isTimeout = err?.name === "AbortError";
+        lastError = isTimeout
+          ? "Analysis timed out. Retrying…"
+          : err?.message || "Analysis failed. Please try again with a clearer photo.";
+
+        if (attempt < MAX_RETRIES && (isTimeout || err?.message?.includes("502"))) {
+          console.warn(`Attempt ${attempt + 1} failed, retrying…`, lastError);
+          continue; // retry
+        }
+
+        const finalMsg = isTimeout
+          ? "Analysis timed out after multiple attempts. Please try a smaller or clearer photo."
+          : lastError;
+        setError(finalMsg);
+        toast({ title: "Analysis Error", description: finalMsg, variant: "destructive" });
       }
-    } catch (err: any) {
-      const msg = err?.message || "Analysis failed. Please try again with a clearer photo.";
-      setError(msg);
-      toast({ title: "Analysis Error", description: msg, variant: "destructive" });
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   const handleReset = () => {
