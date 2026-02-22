@@ -148,8 +148,14 @@ function extractZeroCrossingRate(channelData: Float32Array): number {
 }
 
 function extractEnergyStats(channelData: Float32Array) {
-  const rms = Math.sqrt(channelData.reduce((sum, x) => sum + x * x, 0) / channelData.length);
-  const peak = Math.max(...Array.from(channelData).map(Math.abs));
+  let sumSq = 0;
+  let peak = 0;
+  for (let i = 0; i < channelData.length; i++) {
+    const abs = Math.abs(channelData[i]);
+    sumSq += channelData[i] * channelData[i];
+    if (abs > peak) peak = abs;
+  }
+  const rms = Math.sqrt(sumSq / channelData.length);
   return { rms, peak, dynamicRange: peak / (rms + 0.0001) };
 }
 
