@@ -165,24 +165,7 @@ const Index = () => {
         {loading ? (
           <AnalysisLoader title={LOADER_TEXT[mode].title} subtitle={LOADER_TEXT[mode].subtitle} />
         ) : result ? (
-          <>
-            {renderResults()}
-            {!isSubscribed && freeUsesExhausted && (
-              <div className="rounded-xl border border-border bg-card p-6 text-center space-y-3">
-                <Lock className="w-8 h-8 text-primary mx-auto" />
-                <h3 className="font-display font-semibold text-lg">Want unlimited analyses?</h3>
-                <p className="text-sm text-muted-foreground">
-                  Sign up now and start your 3-day free trial — only $5/week after.
-                </p>
-                <Button
-                  className="gradient-brand text-primary-foreground"
-                  onClick={() => setAuthOpen(true)}
-                >
-                  Sign Up to Continue
-                </Button>
-              </div>
-            )}
-          </>
+          renderResults()
         ) : (
           <>
             <p className="text-center text-xs text-muted-foreground">{UPLOAD_GUIDANCE[mode]}</p>
