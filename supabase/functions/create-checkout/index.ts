@@ -43,6 +43,9 @@ Deno.serve(async (req) => {
       subscription_data: { trial_period_days: 3 },
       success_url: `${req.headers.get("origin")}/`,
       cancel_url: `${req.headers.get("origin")}/`,
+      custom_text: {
+        submit: { message: "Born Male Born Female™ — Science-backed biological sex analysis. Your 3-day free trial starts now." },
+      },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
