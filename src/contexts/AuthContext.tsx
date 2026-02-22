@@ -14,6 +14,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   subscription: SubscriptionState;
+  isAdmin: boolean;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -32,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionState>({
     subscribed: false,
     productId: null,
@@ -55,6 +57,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const checkAdminRole = async (userId: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    setIsAdmin(!!data);
+  };
+
   useEffect(() => {
     const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -62,9 +74,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
         if (session?.user) {
-          setTimeout(() => checkSubscription(), 0);
+          setTimeout(() => {
+            checkSubscription();
+            checkAdminRole(session.user.id);
+          }, 0);
         } else {
           setSubscription({ subscribed: false, productId: null, subscriptionEnd: null, loading: false });
+          setIsAdmin(false);
         }
       }
     );
@@ -73,7 +89,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-      if (session?.user) checkSubscription();
+      if (session?.user) {
+        checkSubscription();
+        checkAdminRole(session.user.id);
+      }
     });
 
     return () => authSub.unsubscribe();
@@ -106,7 +125,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, subscription, signUp, signIn, signOut, checkSubscription }}
+      value={{ user, session, loading, subscription, isAdmin, signUp, signIn, signOut, checkSubscription }}
     >
       {children}
     </AuthContext.Provider>
