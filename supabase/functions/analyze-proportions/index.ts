@@ -58,11 +58,11 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { image, audio, frames, mode = "body" } = await req.json();
+    const { image, audio, audioFeatures, frames, mode = "body" } = await req.json();
 
     // Validate input based on mode
-    if (mode === "voice" && !audio) {
-      return new Response(JSON.stringify({ error: "No audio provided" }), {
+    if (mode === "voice" && !audioFeatures) {
+      return new Response(JSON.stringify({ error: "No audio features provided" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -93,10 +93,22 @@ Deno.serve(async (req: Request) => {
     // Build user content based on mode
     let userContent: any[];
     if (mode === "voice") {
-      // For voice, send audio as data URL for the AI to analyze
+      // For voice, send extracted acoustic measurements as text
+      const voicePrompt = selected.user
+        .replace("{fundamentalFrequency}", String(audioFeatures.fundamentalFrequency?.toFixed(1) ?? "N/A"))
+        .replace("{pitchMean}", String(audioFeatures.pitchMean?.toFixed(1) ?? "N/A"))
+        .replace("{pitchMin}", String(audioFeatures.pitchMin?.toFixed(1) ?? "N/A"))
+        .replace("{pitchMax}", String(audioFeatures.pitchMax?.toFixed(1) ?? "N/A"))
+        .replace("{pitchVariability}", String(audioFeatures.pitchVariability?.toFixed(1) ?? "N/A"))
+        .replace("{spectralCentroid}", String(audioFeatures.spectralCentroid?.toFixed(1) ?? "N/A"))
+        .replace("{formantF1}", String(audioFeatures.formantF1Estimate?.toFixed(1) ?? "N/A"))
+        .replace("{formantF2}", String(audioFeatures.formantF2Estimate?.toFixed(1) ?? "N/A"))
+        .replace("{zeroCrossingRate}", String(audioFeatures.zeroCrossingRate?.toFixed(4) ?? "N/A"))
+        .replace("{rmsEnergy}", String(audioFeatures.rmsEnergy?.toFixed(4) ?? "N/A"))
+        .replace("{duration}", String(audioFeatures.duration?.toFixed(1) ?? "N/A"))
+        .replace("{sampleRate}", String(audioFeatures.sampleRate ?? "N/A"));
       userContent = [
-        { type: "text", text: selected.user },
-        { type: "input_audio", input_audio: { data: audio.replace(/^data:audio\/\w+;base64,/, ""), format: "wav" } },
+        { type: "text", text: voicePrompt },
       ];
     } else if (mode === "gait") {
       // For gait, send multiple frames as images

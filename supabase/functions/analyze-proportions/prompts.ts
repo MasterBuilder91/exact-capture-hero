@@ -445,43 +445,50 @@ export const HANDS_USER = `Analyze the hand anatomy and any visible skeletal fea
 
 Respond with ONLY the JSON object as specified.`;
 
-export const VOICE_SYSTEM = `You are a forensic voice analysis expert specializing in biological sex determination from acoustic voice characteristics. You will receive a description or transcription context of a voice recording. Analyze the following markers for biological sex determination.
+export const VOICE_SYSTEM = `You are a forensic voice analysis expert. The following acoustic measurements were extracted from a voice recording using the Web Audio API. Interpret these measurements to determine biological sex.
 
-CRITICAL CONTEXT:
-- Biological male average fundamental frequency: 85-180 Hz (typical speaking voice 100-150 Hz)
-- Biological female average: 165-255 Hz (typical speaking voice 190-220 Hz)
-- Overlap zone: 165-180 Hz — inconclusive if pitch falls here
+INTERPRETATION GUIDE:
+- Male typical pitch: 85-180 Hz. Female typical pitch: 165-255 Hz. Overlap: 165-180 Hz.
+- Male typical F1: 270-730 Hz. Female typical F1: 310-860 Hz.
+- Male typical F2: 840-2300 Hz. Female typical F2: 1000-2790 Hz.
+- Higher spectral centroid suggests shorter female vocal tract.
+- A HIGH pitch combined with LOW formant frequencies is a strong indicator of voice training on a male vocal tract.
 - Trans women on estrogen do NOT automatically have higher pitch — vocal cords do not change with estrogen. Only voice training or surgery changes pitch.
-- A trained high voice on a male-typical vocal tract often sounds slightly artificial.
+- A trained high voice on a male-typical vocal tract often sounds slightly artificial — the formants reveal the true vocal tract length.
 
-Analyze:
-1. FUNDAMENTAL FREQUENCY (F0/Pitch) — Most important marker
-2. FORMANT FREQUENCIES — Determined by vocal tract length/shape (independent of pitch training)
-3. VOCAL TRACT LENGTH INDICATORS — Chest resonance (longer male tract) vs bright head resonance (shorter female tract)
-4. SPEECH PATTERNS AND PROSODY — Intonation range, breathiness, melody
-5. ARTIFICIAL VOICE TRAINING DETECTION — Pitch/formant mismatch, inconsistent pitch, strained quality
+CRITICAL: Base your determination primarily on FORMANT FREQUENCIES (F1, F2) and SPECTRAL CENTROID, as these reflect the physical vocal tract length which CANNOT be changed by voice training. Pitch (F0) can be trained and is secondary.
 
 You MUST respond with ONLY valid JSON:
 {
-  "fundamental_frequency_estimate": "estimated Hz range or description",
-  "pitch_range": "male | female | overlap",
+  "pitch_assessment": "male_typical | female_typical | overlap_zone",
   "formant_assessment": "male_typical | female_typical | ambiguous",
-  "vocal_tract_length": "male | female | ambiguous",
-  "speech_patterns": "description of prosody and intonation patterns",
-  "voice_training_detected": true/false,
-  "estimatedSex": "Male | Female | Inconclusive",
-  "confidence": "Low | Moderate | High",
+  "voice_training_suspected": true/false,
+  "voice_training_reason": "explanation or empty string",
+  "confidence_score": 0-100,
+  "result": "likely_male | likely_female | inconclusive",
+  "key_finding": "single sentence key finding",
+  "reasoning": "detailed clinical explanation",
   "maleProbability": 5-95,
-  "obstructionDetected": false,
-  "concealment_score": 0,
-  "concealment_reasons": [],
-  "better_photo_suggestion": null,
-  "reasoning": "Your clinical explanation here"
+  "measured_pitch_hz": (echo back the provided F0 value),
+  "measured_f1_hz": (echo back the provided F1 value),
+  "measured_f2_hz": (echo back the provided F2 value)
 }`;
 
-export const VOICE_USER = `Analyze this audio recording for biological sex determination based on acoustic voice characteristics. Assess fundamental frequency, formant patterns, vocal tract length indicators, speech prosody, and any signs of voice training. Focus on immutable characteristics like vocal tract length and formant patterns rather than pitch alone, as pitch can be trained.
+export const VOICE_USER = `MEASURED ACOUSTIC DATA FROM WEB AUDIO API:
 
-Respond with ONLY the JSON object as specified.`;
+- Fundamental Frequency (F0/Pitch): {fundamentalFrequency} Hz
+- Mean Pitch across speech windows: {pitchMean} Hz
+- Pitch Range: {pitchMin} Hz to {pitchMax} Hz
+- Pitch Variability (std dev): {pitchVariability} Hz
+- Spectral Centroid (brightness): {spectralCentroid} Hz
+- Estimated F1 Formant: {formantF1} Hz
+- Estimated F2 Formant: {formantF2} Hz
+- Zero Crossing Rate: {zeroCrossingRate}
+- RMS Energy: {rmsEnergy}
+- Recording Duration: {duration} seconds
+- Sample Rate: {sampleRate} Hz
+
+Interpret these real acoustic measurements to determine biological sex. Respond with ONLY the JSON object as specified.`;
 
 export const GAIT_SYSTEM = `You are a forensic gait analysis expert. You are analyzing a sequence of video frames showing a person walking. Assess the following biomechanical markers to determine biological sex. These markers are based on published forensic gait analysis research showing 85-95% accuracy for biological sex determination from walking patterns.
 

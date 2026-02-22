@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { AnalysisMode, AnalysisResult, FaceAnalysisResult, HandAnalysisResult, VoiceAnalysisResult, GaitAnalysisResult } from "@/types/analysis";
 import { Scan, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { analyzeAudioDataUrl } from "@/lib/audioAnalysis";
 
 const FREE_USES_KEY = "bmbf_free_uses";
 const MAX_FREE_USES = 1;
@@ -134,7 +135,9 @@ const Index = () => {
           const frames = await extractVideoFrames(currentMedia);
           requestBody.frames = frames;
         } else if (mode === "voice") {
-          requestBody.audio = currentMedia;
+          // Extract real acoustic measurements client-side via Web Audio API
+          const audioFeatures = await analyzeAudioDataUrl(currentMedia);
+          requestBody.audioFeatures = audioFeatures;
         } else {
           requestBody.image = currentMedia;
         }
