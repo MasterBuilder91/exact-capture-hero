@@ -20,7 +20,7 @@ const FREE_USES_KEY = "bmbf_free_uses";
 const MAX_FREE_USES = 1;
 
 const UPLOAD_GUIDANCE: Record<AnalysisMode, string> = {
-  body: "Upload a photo showing the full torso (shoulders to hips) for best results.",
+  body: "Upload a photo showing the full torso (shoulders to hips). For chest analysis, a fitted top or shirtless photo gives the most accurate breast/chest authenticity results.",
   face: "Upload a front-facing photo where the face is clearly visible and unobscured for best results.",
   hands: "Upload a clear photo of the hand(s) with fingers spread. Palm-up or palm-down both work. Include the wrist if possible.",
 };
