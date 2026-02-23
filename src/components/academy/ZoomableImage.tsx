@@ -23,12 +23,15 @@ const ZoomableImage = ({ src, alt, className = "" }: ZoomableImageProps) => {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-2 bg-background/95 backdrop-blur-md border-border">
-          <img
-            src={src}
-            alt={alt}
-            className="w-full h-full max-h-[85vh] object-contain rounded-lg"
-          />
+        <DialogContent className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 bg-background border-none rounded-none [&>button]:z-50 [&>button]:bg-background/80 [&>button]:rounded-full [&>button]:p-2">
+          <div className="w-full h-full flex items-center justify-center overflow-auto p-4">
+            <img
+              src={src}
+              alt={alt}
+              className="max-w-none w-auto h-auto max-h-[95vh] object-contain cursor-zoom-out"
+              onClick={() => setOpen(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </>
