@@ -52,9 +52,9 @@ const LandingPage = () => {
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
             Our military-grade AI analyzes <strong className="text-foreground">body, face, hands, voice &amp; gait</strong> using forensic anthropology markers — delivering a science-backed biological sex verdict in seconds.
           </p>
-          <p className="text-sm text-accent font-medium">
-            ✨ Sign up free · No credit card required · First analysis on us
-          </p>
+           <p className="text-sm text-accent font-medium">
+             ✨ 2 free analyses · No signup required · 3-day free trial after
+           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
             <Button
               size="lg"
@@ -189,8 +189,8 @@ const LandingPage = () => {
               {checkoutLoading ? "Loading…" : "Sign Up & Start Analyzing"}
             </Button>
             <p className="text-xs text-muted-foreground">
-              $5/week after 3-day free trial. Cancel anytime. No questions asked.
-            </p>
+               You've used your 2 free analyses. Start your 3-day free trial to continue — $5/week after, cancel anytime.
+             </p>
           </div>
         </div>
       </section>
