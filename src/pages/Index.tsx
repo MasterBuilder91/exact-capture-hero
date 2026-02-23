@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { analyzeAudioDataUrl } from "@/lib/audioAnalysis";
 
 const FREE_USES_KEY = "bmbf_free_uses";
-const MAX_FREE_USES = 1;
+const MAX_FREE_USES = 2;
 
 const UPLOAD_GUIDANCE: Record<AnalysisMode, string> = {
   body: "Upload a photo showing the full torso (shoulders to hips). For chest analysis, a fitted top or shirtless photo gives the most accurate breast/chest authenticity results.",
@@ -263,9 +263,9 @@ const Index = () => {
         <div className="text-center space-y-2">
           <h1 className="font-display text-3xl font-bold gradient-brand-text">Born Male Born Female</h1>
           <p className="text-sm text-muted-foreground">Everyone has the right to know.</p>
-          {!isSubscribed && !freeUsesExhausted && (
-            <p className="text-xs text-accent font-medium">✨ Try one free analysis — no signup required</p>
-          )}
+           {!isSubscribed && !freeUsesExhausted && (
+             <p className="text-xs text-accent font-medium">✨ {2 - parseInt(localStorage.getItem(FREE_USES_KEY) || "0", 10)} of 2 free analyses remaining — no signup required</p>
+           )}
         </div>
 
         <ModuleSelector mode={mode} onModeChange={handleModeChange} />
