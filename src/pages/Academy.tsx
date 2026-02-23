@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Zap, Swords, Target, ArrowLeft, GraduationCap } from "lucide-react";
+import { Zap, Swords, Target, ArrowLeft, GraduationCap, BookOpen } from "lucide-react";
 import QuizChallenge from "@/components/academy/QuizChallenge";
 import MarkerShowdown from "@/components/academy/MarkerShowdown";
 import SpotTheMarkers from "@/components/academy/SpotTheMarkers";
+import ForensicClassroom from "@/components/academy/ForensicClassroom";
 
 const Academy = () => {
-  const [tab, setTab] = useState("quiz");
+  const [tab, setTab] = useState("classroom");
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -38,7 +39,12 @@ const Academy = () => {
 
         {/* Game Tabs */}
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-4 h-auto p-1">
+            <TabsTrigger value="classroom" className="flex flex-col items-center gap-1 py-3 text-xs">
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Classroom</span>
+              <span className="sm:hidden">Learn</span>
+            </TabsTrigger>
             <TabsTrigger value="quiz" className="flex flex-col items-center gap-1 py-3 text-xs">
               <Zap className="w-4 h-4" />
               <span className="hidden sm:inline">Quiz Challenge</span>
@@ -56,6 +62,9 @@ const Academy = () => {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="classroom" className="mt-6">
+            <ForensicClassroom />
+          </TabsContent>
           <TabsContent value="quiz" className="mt-6">
             <QuizChallenge />
           </TabsContent>
