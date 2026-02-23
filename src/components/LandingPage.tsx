@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Camera, Search, Shield, FlaskConical, Lock, Zap } from "lucide-react";
 import { User, ScanFace, Hand } from "lucide-react";
+import maleSkeleton from "@/assets/diagram_male_skeleton.png";
+import femaleSkeleton from "@/assets/diagram_female_skeleton.png";
 import AuthModal from "./AuthModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -40,6 +42,19 @@ const LandingPage = () => {
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
         <span className="gender-symbol top-10 -left-20 text-primary/5">♂</span>
         <span className="gender-symbol bottom-10 -right-16 text-accent/5">♀</span>
+
+        {/* Male skeleton - left side */}
+        <img
+          src={maleSkeleton}
+          alt="Male skeletal proportions"
+          className="hidden md:block absolute left-4 lg:left-12 bottom-8 w-40 lg:w-52 opacity-20 pointer-events-none select-none"
+        />
+        {/* Female skeleton - right side */}
+        <img
+          src={femaleSkeleton}
+          alt="Female skeletal proportions"
+          className="hidden md:block absolute right-4 lg:right-12 bottom-8 w-40 lg:w-52 opacity-20 pointer-events-none select-none"
+        />
 
         <div className="relative z-10 text-center max-w-3xl mx-auto px-4 space-y-6 py-20">
           <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-tight">
