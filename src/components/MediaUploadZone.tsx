@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import { Upload, X, Mic, Video, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,8 @@ const MediaUploadZone = ({ type, onMediaSelected, mediaPreview, onClear, disable
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const videoPreviewRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const accept = type === "audio"
     ? "audio/mpeg,audio/wav,audio/mp4,audio/x-m4a,audio/webm"
@@ -44,7 +46,18 @@ const MediaUploadZone = ({ type, onMediaSelected, mediaPreview, onClear, disable
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const constraints = type === "audio"
+        ? { audio: true }
+        : { audio: true, video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      streamRef.current = stream;
+
+      if (type === "video" && videoPreviewRef.current) {
+        videoPreviewRef.current.srcObject = stream;
+        videoPreviewRef.current.play();
+      }
+
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -54,19 +67,22 @@ const MediaUploadZone = ({ type, onMediaSelected, mediaPreview, onClear, disable
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const mimeType = type === "audio" ? "audio/webm" : "video/webm";
+        const blob = new Blob(chunksRef.current, { type: mimeType });
         const reader = new FileReader();
         reader.onload = (e) => {
           onMediaSelected(e.target?.result as string);
         };
         reader.readAsDataURL(blob);
         stream.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+        if (videoPreviewRef.current) videoPreviewRef.current.srcObject = null;
       };
 
       mediaRecorder.start();
       setIsRecording(true);
     } catch {
-      console.error("Microphone access denied");
+      console.error(`${type === "audio" ? "Microphone" : "Camera"} access denied`);
     }
   };
 
@@ -74,6 +90,13 @@ const MediaUploadZone = ({ type, onMediaSelected, mediaPreview, onClear, disable
     mediaRecorderRef.current?.stop();
     setIsRecording(false);
   };
+
+  // Cleanup stream on unmount
+  useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach(t => t.stop());
+    };
+  }, []);
 
   if (mediaPreview) {
     return (
@@ -127,19 +150,37 @@ const MediaUploadZone = ({ type, onMediaSelected, mediaPreview, onClear, disable
         />
       </label>
 
-      {type === "audio" && (
+      {type === "audio" && !isRecording && (
         <div className="flex justify-center">
-          {isRecording ? (
+          <Button onClick={startRecording} variant="outline" size="sm" className="gap-2">
+            <Mic className="w-3 h-3" />
+            Record with Microphone
+          </Button>
+        </div>
+      )}
+
+      {type === "video" && !isRecording && (
+        <div className="flex justify-center">
+          <Button onClick={startRecording} variant="outline" size="sm" className="gap-2">
+            <Video className="w-3 h-3" />
+            Record with Camera
+          </Button>
+        </div>
+      )}
+
+      {isRecording && (
+        <div className="space-y-3">
+          {type === "video" && (
+            <div className="max-w-md mx-auto rounded-lg overflow-hidden border border-destructive/50">
+              <video ref={videoPreviewRef} muted playsInline className="w-full max-h-64 rounded" />
+            </div>
+          )}
+          <div className="flex justify-center">
             <Button onClick={stopRecording} variant="destructive" size="sm" className="gap-2">
               <Square className="w-3 h-3" />
               Stop Recording
             </Button>
-          ) : (
-            <Button onClick={startRecording} variant="outline" size="sm" className="gap-2">
-              <Mic className="w-3 h-3" />
-              Record with Microphone
-            </Button>
-          )}
+          </div>
         </div>
       )}
     </div>
