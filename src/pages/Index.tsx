@@ -12,6 +12,7 @@ import VoiceResultsCard from "@/components/VoiceResultsCard";
 import GaitResultsCard from "@/components/GaitResultsCard";
 import ModuleSelector from "@/components/ModuleSelector";
 import Disclaimer from "@/components/Disclaimer";
+import DiagramShowcase from "@/components/DiagramShowcase";
 import AuthModal from "@/components/AuthModal";
 import { Button } from "@/components/ui/button";
 import { AnalysisMode, AnalysisResult, FaceAnalysisResult, HandAnalysisResult, VoiceAnalysisResult, GaitAnalysisResult } from "@/types/analysis";
@@ -317,6 +318,8 @@ const Index = () => {
         )}
 
         <Disclaimer />
+
+        <DiagramShowcase />
       </main>
 
       <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
