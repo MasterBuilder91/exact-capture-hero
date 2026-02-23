@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, XCircle, RotateCcw, Target, Lightbulb, ArrowRight } from "lucide-react";
+import ZoomableImage from "./ZoomableImage";
 import diagramMaleSkeleton from "@/assets/diagram_male_skeleton.png";
 import diagramFemaleSkeleton from "@/assets/diagram_female_skeleton.png";
 import diagramFaceMarkers from "@/assets/diagram_face_markers.png";
@@ -206,7 +207,7 @@ const SpotTheMarkers = () => {
 
       {/* Diagram */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <img
+        <ZoomableImage
           src={ch.image}
           alt={ch.imageAlt}
           className="w-full max-h-[300px] object-contain object-center bg-background/50 p-2"
