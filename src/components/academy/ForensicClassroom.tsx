@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
   BookOpen, ChevronRight, ChevronLeft, CheckCircle, Bone, Skull,
-  Footprints, Mic, Hand, RotateCcw, GraduationCap,
+  Footprints, Mic, Hand, RotateCcw, GraduationCap, Lock,
 } from "lucide-react";
 import ZoomableImage from "./ZoomableImage";
+import { useAuth } from "@/contexts/AuthContext";
+import AuthModal from "@/components/AuthModal";
 
 import diagramFemaleSkeleton from "@/assets/diagram_female_skeleton.png";
 import diagramMaleSkeleton from "@/assets/diagram_male_skeleton.png";
@@ -224,13 +226,27 @@ const LESSONS: Lesson[] = [
 
 /* ── Component ────────────────────────────────────────────────── */
 
+const FREE_LESSON_COUNT = 1;
+
 const ForensicClassroom = () => {
   const [state, setState] = useState<"menu" | "lesson">("menu");
   const [lessonIdx, setLessonIdx] = useState(0);
   const [sectionIdx, setSectionIdx] = useState(0);
   const [completed, setCompleted] = useState<Set<string>>(new Set());
+  const [showAuth, setShowAuth] = useState(false);
+  const { user, subscription } = useAuth();
+
+  const hasAccess = subscription.subscribed;
+
+  const isLessonLocked = (idx: number) => idx >= FREE_LESSON_COUNT && !hasAccess;
 
   const openLesson = (idx: number) => {
+    if (isLessonLocked(idx)) {
+      if (!user) {
+        setShowAuth(true);
+      }
+      return;
+    }
     setLessonIdx(idx);
     setSectionIdx(0);
     setState("lesson");
@@ -280,26 +296,52 @@ const ForensicClassroom = () => {
         <div className="space-y-2">
           {LESSONS.map((l, idx) => {
             const done = completed.has(l.id);
+            const locked = isLessonLocked(idx);
             return (
               <button
                 key={l.id}
                 onClick={() => openLesson(idx)}
-                className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 hover:bg-secondary/30 transition-all text-left group"
+                className={`w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card transition-all text-left group ${
+                  locked ? "opacity-60" : "hover:border-primary/30 hover:bg-secondary/30"
+                }`}
               >
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${done ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"}`}>
-                  {done ? <CheckCircle className="w-5 h-5" /> : l.icon}
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                  locked ? "bg-muted text-muted-foreground" : done ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"
+                }`}>
+                  {locked ? <Lock className="w-5 h-5" /> : done ? <CheckCircle className="w-5 h-5" /> : l.icon}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-foreground truncate">
                     {idx + 1}. {l.title}
                   </p>
-                  <p className="text-xs text-muted-foreground truncate">{l.subtitle}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {locked ? "Subscribe to unlock" : l.subtitle}
+                  </p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                {locked ? (
+                  <Lock className="w-4 h-4 text-muted-foreground shrink-0" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                )}
               </button>
             );
           })}
         </div>
+
+        {!hasAccess && (
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 text-center space-y-2">
+            <Lock className="w-5 h-5 mx-auto text-primary" />
+            <p className="text-sm font-semibold text-foreground">Unlock All Lessons</p>
+            <p className="text-xs text-muted-foreground">
+              The first lesson is free. Subscribe to access the full {LESSONS.length}-lesson forensic course.
+            </p>
+            {!user && (
+              <Button size="sm" className="gradient-brand text-primary-foreground mt-2" onClick={() => setShowAuth(true)}>
+                Sign Up to Get Started
+              </Button>
+            )}
+          </div>
+        )}
 
         {completed.size === LESSONS.length && (
           <div className="text-center space-y-3 py-4 animate-fade-in">
@@ -311,6 +353,8 @@ const ForensicClassroom = () => {
             </Button>
           </div>
         )}
+
+        <AuthModal open={showAuth} onOpenChange={setShowAuth} />
       </div>
     );
   }
