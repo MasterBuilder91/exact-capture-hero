@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Camera, Search, Shield, FlaskConical, Lock, Zap } from "lucide-react";
+import { Camera, Search, Shield, FlaskConical, Lock, Zap, Mic, Footprints } from "lucide-react";
 import { User, ScanFace, Hand } from "lucide-react";
 import AuthModal from "./AuthModal";
 import DiagramShowcase from "./DiagramShowcase";
@@ -50,7 +50,10 @@ const LandingPage = () => {
             Is your date really who they say they are?
           </p>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Find out in seconds with science-backed biological sex analysis. <strong className="text-foreground">Body. Face. Hands.</strong>
+            Our military-grade AI analyzes <strong className="text-foreground">body, face, hands, voice &amp; gait</strong> using forensic anthropology markers — delivering a science-backed biological sex verdict in seconds.
+          </p>
+          <p className="text-sm text-accent font-medium">
+            ✨ Sign up free · No credit card required · First analysis on us
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
             <Button
@@ -59,7 +62,7 @@ const LandingPage = () => {
               onClick={handleStartTrial}
               disabled={checkoutLoading}
             >
-              {checkoutLoading ? "Loading…" : "Start Free Trial"}
+              {checkoutLoading ? "Loading…" : "Sign Up Free & Analyze"}
             </Button>
             <Button size="lg" variant="outline" onClick={scrollToHowItWorks} className="px-8 text-base">
               See How It Works
@@ -72,10 +75,7 @@ const LandingPage = () => {
       <section className="py-16 px-4">
         <div className="max-w-2xl mx-auto text-center space-y-4">
           <p className="text-muted-foreground leading-relaxed">
-            In today's dating landscape, transparency matters. Born Male Born Female is a safety and awareness tool for people
-            who want to make informed decisions about who they date. Upload a photo and let our AI analyze body,
-            facial, and hand proportions using the same forensic anthropology markers scientists use — and get an
-            educated, science-based estimate in seconds.
+            Born Male Born Female uses the same forensic anthropology markers scientists and law enforcement rely on — skeletal proportions, craniofacial morphology, digit ratios, acoustic formants, and gait biomechanics. Our advanced AI cross-references <strong className="text-foreground">five independent biological modules</strong> to deliver the most comprehensive analysis available anywhere. No guesswork. Pure science.
           </p>
         </div>
       </section>
@@ -106,17 +106,22 @@ const LandingPage = () => {
 
       <DiagramShowcase />
 
-      {/* Three Modules */}
+      {/* Five Modules */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="font-display text-3xl font-bold text-center mb-12">
-            Three <span className="gradient-brand-text">Modules</span>
+          <h2 className="font-display text-3xl font-bold text-center mb-4">
+            Five <span className="gradient-brand-text">Forensic Modules</span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <p className="text-center text-sm text-muted-foreground mb-12 max-w-lg mx-auto">
+            Each module targets a different category of immutable biological markers. Together, they create an analysis no single test can match.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { icon: User, title: "Body Analysis", desc: "Shoulder-to-hip ratio, rib cage shape, skeletal frame", symbol: "♂" },
-              { icon: ScanFace, title: "Face Analysis", desc: "Forehead, brow ridge, jaw, orbital shape, chin structure", symbol: "♀" },
-              { icon: Hand, title: "Hands Analysis", desc: "Digit ratio, metacarpal robustness, wrist width, clavicle", symbol: "♂" },
+              { icon: User, title: "Body Analysis", desc: "Shoulder-to-hip ratio, rib cage shape, skeletal frame width", symbol: "♂" },
+              { icon: ScanFace, title: "Face Analysis", desc: "Brow ridge, jaw angle, orbital shape, forehead slope, chin structure", symbol: "♀" },
+              { icon: Hand, title: "Hands Analysis", desc: "2D:4D digit ratio, metacarpal robustness, wrist circumference", symbol: "♂" },
+              { icon: Mic, title: "Voice Analysis", desc: "Fundamental frequency, formant spacing, vocal tract length markers", symbol: "♀" },
+              { icon: Footprints, title: "Gait Analysis", desc: "Hip sway, pelvic rotation, step width, biomechanical Q-angle", symbol: "♂" },
             ].map((m) => (
               <div key={m.title} className="relative p-6 rounded-xl bg-card border border-border space-y-3 overflow-hidden">
                 <span className="absolute -top-4 -right-4 text-8xl font-bold opacity-[0.03]">{m.symbol}</span>
@@ -136,8 +141,7 @@ const LandingPage = () => {
             Everyone has the right to <span className="gradient-brand-text">know.</span>
           </h2>
           <p className="text-muted-foreground leading-relaxed max-w-xl mx-auto">
-            Transparency in dating isn't just a preference — it's a safety issue. Born Male Born Female gives you a science-based second
-            opinion so you can make informed decisions. No judgment. Just data.
+            Our AI doesn't guess — it measures. Five independent forensic modules analyze immutable biological markers that persist regardless of surgery, hormones, or cosmetics. Sign up free and see for yourself.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
             {[
@@ -182,7 +186,7 @@ const LandingPage = () => {
               onClick={handleStartTrial}
               disabled={checkoutLoading}
             >
-              {checkoutLoading ? "Loading…" : "Start My Free Trial"}
+              {checkoutLoading ? "Loading…" : "Sign Up & Start Analyzing"}
             </Button>
             <p className="text-xs text-muted-foreground">
               $5/week after 3-day free trial. Cancel anytime. No questions asked.

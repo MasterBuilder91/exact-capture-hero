@@ -32,8 +32,8 @@ const Academy = () => {
             Forensic <span className="gradient-brand-text">Academy</span>
           </h1>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            Learn the science of biological sex determination through interactive games.
-            Three modes, dozens of questions, real forensic knowledge.
+            100% free forensic education. Learn the science — then put it to the test with our
+            <Link to="/" className="text-primary font-medium hover:underline ml-1">AI-powered analysis tool</Link>.
           </p>
         </div>
 
