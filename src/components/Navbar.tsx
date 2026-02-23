@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import AuthModal from "./AuthModal";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, FlaskConical } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const { user, signOut, subscription } = useAuth();
@@ -17,6 +18,10 @@ const Navbar = () => {
           </a>
 
           <div className="flex items-center gap-3">
+            <Link to="/science" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              <FlaskConical className="w-3.5 h-3.5" />
+              The Science
+            </Link>
             {user ? (
               <>
                 {subscription.subscribed && (
