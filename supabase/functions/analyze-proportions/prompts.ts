@@ -252,6 +252,70 @@ CONCEALMENT FLAGS FOR ARMS:
 - Oversized/baggy sleeves → flag in concealment_reasons
 - Arms crossed or hidden behind back → flag in concealment_reasons
 
+POSE NATURALNESS ANALYSIS (MANDATORY when full/partial body is visible):
+Natal males attempting to pose as women systematically adopt feminine poses that look UNNATURAL on a male skeleton. Cis women learn these poses from childhood and execute them with relaxed, biomechanically correct form. A male skeleton forced into a "feminine" pose produces specific tells because male joint range of motion, limb-to-torso ratios, center of gravity, and pelvic geometry physically resist the pose. You MUST analyze pose naturalness and include a "pose_analysis" object with:
+- "pose_type": "neutral | feminine-coded (S-curve, hip pop, contrapposto, model pose) | masculine-coded (square stance, hands in pockets, wide base) | other"
+- "naturalness": "natural | forced | exaggerated | unstable"
+- "biomechanical_tells": array of strings listing specific unnatural compensations observed
+- "confidence_contribution": "strong male indicator | slight male indicator | neutral | slight female indicator"
+
+KEY UNNATURAL-POSE TELLS (each is a MALE indicator when a "feminine" pose is being attempted):
+
+1. HIP POP / S-CURVE FAILURE — Weight: HIGH
+Cis women hip-pop by shifting weight to one leg; the wider female pelvis tilts laterally and creates a smooth S-curve from shoulder to ankle. On a male skeleton (narrow pelvis, higher center of gravity), the same attempt produces:
+   - A sharp lateral kink at the waist instead of a smooth curve
+   - The torso leans the WRONG way (toward, not away from, the loaded leg) to fake hip width
+   - One shoulder visibly drops far below horizontal to compensate
+   - The "popped" hip barely protrudes because the iliac crest isn't wide enough — it looks like a leg shift, not a hip curve
+   - Knees stay locked rigid rather than the relaxed bent-knee femoral angle a wider female pelvis allows
+
+2. CONTRAPPOSTO / MODEL POSE FAILURE — Weight: HIGH
+The classic "model stance" (one foot crossed in front, hip out, weight on back leg) requires female hip rotation. On a male frame:
+   - The crossed foot can't fully cross the midline — male hip joint range stops it short
+   - Pelvis stays squared forward instead of rotating; the pose looks like the legs are crossed but the hips are facing the camera flat
+   - Shoulders over-rotate to compensate, producing a twisted, top-heavy look
+
+3. STANCE WIDTH — Weight: MEDIUM-HIGH
+- Cis women in casual standing pose: feet narrow (often touching or within hip width), toes neutral or slightly out, knees close together or touching.
+- Natal males forcing a "feminine" stance: feet artificially pinched together but knees still apart (male femoral angle won't let knees touch), or stance still secretly wide (>hip width) even when posing closed.
+- "Knee gap with closed feet" is a strong male tell — female Q-angle brings knees together when feet close.
+
+4. SHOULDER & ARM CARRIAGE — Weight: MEDIUM-HIGH
+- Cis women relaxed: shoulders sit naturally, arms hang slightly forward of the torso midline due to narrower shoulder width relative to ribcage.
+- Natal male forcing femininity: shoulders hunched forward or actively rolled in to fake narrower shoulder width, arms held tight to sides to hide breadth, elbows tucked in unnaturally, hands clasped in front of pelvis to hide hip narrowness.
+- "Hunched shoulder roll" or visible muscular effort to keep shoulders narrow = strong male tell.
+
+5. HAND PLACEMENT — Weight: MEDIUM
+- Cis women: hands rest naturally on hip crest (because the iliac crest is there to rest on), or hang relaxed at sides.
+- Natal male: "hand on hip" sits too HIGH on the waist (no iliac crest shelf to rest on) or too LOW on the thigh; or both hands clasped low in front to cover crotch/hip area.
+- Fingers splayed unnaturally wide or held in stiff "delicate" position rather than relaxed curl = forced femininity.
+
+6. HEAD TILT & NECK ANGLE — Weight: MEDIUM
+- Cis women head tilt: gentle, follows the S-curve, neck stays relaxed.
+- Natal male forcing tilt: head tilted sharply (>15°) to look "cute," neck visibly strained, often combined with chin tucked down and to the side to shrink jaw — this is a known camera-evasion pose.
+
+7. CENTER OF GRAVITY — Weight: HIGH
+Male center of gravity sits higher (in the chest); female center of gravity sits lower (in the pelvis). Feminine poses are stable on a female frame and UNSTABLE on a male frame. Tells:
+   - Visible micro-bracing: tension in calves, locked knees, gripping toes
+   - Wide compensatory foot placement hidden behind a prop
+   - Leaning against a wall, doorframe, car, or furniture in EVERY photo (props compensate for instability)
+   - Asymmetric weight distribution that would topple a male frame without the prop
+
+8. PROP DEPENDENCE — Weight: MEDIUM
+Repeated reliance on walls, furniture, hands-on-hip "anchoring," or held objects to maintain a feminine pose = the pose isn't natural to the body. Flag in pose_analysis and concealment_reasons.
+
+9. OVER-PERFORMANCE — Weight: MEDIUM
+Cis women in casual photos look CASUAL. When every photo is a deliberate pose (S-curve, pout, hand-on-hip, head tilt, leg cross) with no relaxed neutral stance, the subject is performing femininity rather than inhabiting it. Note in reasoning.
+
+POSE CONFIDENCE CONTRIBUTION:
+- Forced/unstable feminine pose with 2+ biomechanical tells → strong male indicator, add up to 15 points to maleProbability
+- Forced pose with 1 tell → slight male indicator, add up to 8 points
+- Natural relaxed feminine pose with no tells → neutral (do NOT use as female evidence; cis-passing trans women can learn the pose)
+- Natural masculine pose (square stance, wide base, hands in pockets) on feminine-presenting subject → slight male indicator
+Mention specific biomechanical tells in reasoning (e.g., "knee gap with closed feet indicates male Q-angle," "hip pop produces lateral kink rather than S-curve, indicating narrow male pelvis").
+
+
+
 You MUST respond with ONLY valid JSON in this exact format (no markdown, no extra text):
 {
   "shoulder_width": "narrow | medium | broad",
