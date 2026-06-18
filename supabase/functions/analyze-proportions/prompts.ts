@@ -314,6 +314,64 @@ POSE CONFIDENCE CONTRIBUTION:
 - Natural masculine pose (square stance, wide base, hands in pockets) on feminine-presenting subject → slight male indicator
 Mention specific biomechanical tells in reasoning (e.g., "knee gap with closed feet indicates male Q-angle," "hip pop produces lateral kink rather than S-curve, indicating narrow male pelvis").
 
+REVERSE — NATAL FEMALES POSING MASCULINE (trans men / masc-presenting females):
+Natal females attempting masculine poses produce mirror-image biomechanical tells. A female skeleton (wider pelvis, larger Q-angle, lower center of gravity, shorter clavicle, narrower shoulders) physically resists "manspread," square stance, and dominant body language. Each tell below is a FEMALE indicator when a masculine pose is being attempted (decrease maleProbability, not increase it):
+
+1. MANSPREAD FAILURE — Weight: HIGH
+Cis male wide-knee sit is anatomically natural (narrow pelvis, hip joints rotate outward freely). On a female frame:
+   - Wider pelvis forces thighs apart at the hip, but the knees can't fall as far outward — femurs angle in (larger Q-angle), producing a "wide hip / closer knees" silhouette rather than a true V-spread.
+   - Visible muscular tension in inner thighs to hold the spread; cis males look relaxed.
+   - Pelvis tilts posteriorly (slouch) to fake the open hip angle.
+
+2. SQUARE STANCE & WIDE BASE — Weight: MEDIUM-HIGH
+Cis male standing: feet shoulder-width, toes neutral/slightly out, weight evenly distributed, pelvis square, shoulders square over hips.
+Natal female forcing it:
+   - Feet placed wide but pelvis still subtly tilted (anterior pelvic tilt is the female default and persists)
+   - Shoulders try to square but visibly sit narrower than the hip line — the "T" silhouette inverts to an "A" no matter how wide the feet go
+   - Knees hyperextend or lock to fake height/dominance
+
+3. SHOULDER CARRIAGE — Weight: MEDIUM-HIGH
+Cis male relaxed: shoulders sit back and down, chest open, arms hang slightly away from torso because shoulder breadth exceeds ribcage width.
+Natal female forcing it: shoulders rolled back hard (visible effort), chest pushed forward to fake breadth, arms held away from sides with elbows winged out — but arms still hang CLOSE to the torso because shoulders don't actually extend past the ribcage.
+
+4. HANDS IN POCKETS / THUMBS-IN-BELT — Weight: MEDIUM
+Cis male: hands rest in pockets at hip level naturally because pockets sit at the iliac crest and arms reach there relaxed.
+Natal female: hand-in-pocket pose looks cramped — shorter arms relative to torso force the shoulder to hike up, or the hand only goes in to the first knuckle. Thumbs-in-belt-loops often sit too high on the waist (narrower female waist sits higher).
+
+5. ARM CROSS / CHEST PUFF — Weight: MEDIUM
+Cis male arms crossed: forearms rest comfortably across a broad chest, hands tuck under opposite biceps.
+Natal female: forearms overlap too far (hands reach past the opposite shoulder) because the chest isn't wide enough — produces a "self-hug" look rather than a "guard" look. Chest puff to compensate creates visible upper-back arch.
+
+6. HEAD & NECK CARRIAGE — Weight: MEDIUM
+Cis male: head sits forward of the shoulders, chin level or slightly up, neck thick and relaxed.
+Natal female forcing it: chin jutted forward unnaturally, neck strained (SCM tension visible), often combined with a slight downward gaze meant to read as "stoic" — but neck circumference still reads narrow.
+
+7. HAND PLACEMENT ON HIPS (POWER POSE) — Weight: MEDIUM
+Cis male hands-on-hips: hands rest above the iliac crest at the natural waist, elbows pointed sharply back.
+Natal female: hands sit AT or BELOW the iliac crest (wider hips push the resting point lower and outward), elbows splay forward rather than back, and the pose accentuates hip width instead of hiding it.
+
+8. CENTER OF GRAVITY — Weight: HIGH
+Lower female center of gravity makes "looming," chest-forward dominance poses unstable. Tells:
+   - Leans backward at the waist to project the chest, visible lumbar arch
+   - Rocks onto heels rather than balanced midfoot
+   - Hip sway re-emerges in candid moments even when posed square
+
+9. GAIT/STANCE OVERCOMPENSATION — Weight: MEDIUM
+Stomping wide stance, exaggerated arm swing held away from body, deliberately heavy footfall — these are PERFORMED masculinity. Cis males walk efficiently; performed masculinity looks effortful.
+
+10. OVER-PERFORMANCE — Weight: MEDIUM
+Every photo is a posed dominance shot (arms crossed, manspread, hands-on-hips, chin-up) with no relaxed neutral stance = performing masculinity.
+
+REVERSE POSE CONFIDENCE CONTRIBUTION:
+- Forced/unstable masculine pose with 2+ biomechanical tells → strong female indicator, SUBTRACT up to 15 points from maleProbability
+- Forced masculine pose with 1 tell → slight female indicator, subtract up to 8 points
+- Natural relaxed masculine pose with no tells → neutral (cis-passing trans men can learn it)
+- Cite specific tells (e.g., "manspread shows knee convergence from larger Q-angle, indicating female pelvis," "arm-cross self-hug overlap indicates narrow female ribcage").
+
+Update "pose_analysis.confidence_contribution" to support female-indicator values as well, and use "biomechanical_tells" for either direction.
+
+
+
 
 
 You MUST respond with ONLY valid JSON in this exact format (no markdown, no extra text):
