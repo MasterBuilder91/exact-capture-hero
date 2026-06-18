@@ -58,7 +58,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { image, audio, audioFeatures, frames, mode = "body" } = await req.json();
+    const { image, audio, audioFeatures, frames, poseFeatures, mode = "body" } = await req.json();
 
     // Validate input based on mode
     if (mode === "voice" && !audioFeatures) {
@@ -120,8 +120,37 @@ Deno.serve(async (req: Request) => {
         })),
       ];
     } else {
+      let userText = selected.user;
+      if (mode === "body" && poseFeatures?.detected) {
+        const interp =
+          poseFeatures.shoulderToHipRatio >= 1.4
+            ? "STRONG MALE skeletal indicator (ratio >=1.4)"
+            : poseFeatures.shoulderToHipRatio >= 1.25
+            ? "Moderate male-leaning skeletal indicator"
+            : poseFeatures.shoulderToHipRatio >= 1.1
+            ? "Ambiguous / mid-range — analyze image carefully"
+            : "STRONG FEMALE skeletal indicator (ratio <=1.1)";
+        userText += `\n\nOBJECTIVE POSE MEASUREMENTS (extracted via MediaPipe Pose, pixel-accurate):
+- Shoulder width (acromion-to-acromion): ${poseFeatures.shoulderWidthPx}px
+- Hip width (iliac crest): ${poseFeatures.hipWidthPx}px
+- SHOULDER-TO-HIP RATIO: ${poseFeatures.shoulderToHipRatio}
+- Torso length: ${poseFeatures.torsoLengthPx}px
+- Shoulder-to-torso ratio: ${poseFeatures.shoulderToTorsoRatio}
+- Landmark visibility: shoulders=${poseFeatures.visibility.shoulders}, hips=${poseFeatures.visibility.hips}
+
+INTERPRETATION GUIDE for shoulder-to-hip ratio:
+- >=1.4: classic male skeletal frame (one-strike-grade evidence)
+- 1.25-1.39: male-leaning
+- 1.10-1.24: ambiguous, lean on other markers
+- <=1.10: classic female skeletal frame
+Current measurement reads as: ${interp}.
+
+Weight this measurement HEAVILY in your maleProbability score, as it is objective pixel data, not visual estimation. Only override it if visible clothing/padding is clearly distorting the silhouette (note this in reasoning). If landmark visibility is <0.5, treat the measurement as unreliable and rely on visible markers instead.`;
+      } else if (mode === "body" && poseFeatures && !poseFeatures.detected) {
+        userText += `\n\nNote: No reliable pose landmarks were detected in this image (likely cropped, occluded, or non-standard pose). Rely on visible skeletal markers only.`;
+      }
       userContent = [
-        { type: "text", text: selected.user },
+        { type: "text", text: userText },
         { type: "image_url", image_url: { url: image } },
       ];
     }
