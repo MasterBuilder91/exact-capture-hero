@@ -19,6 +19,7 @@ import { AnalysisMode, AnalysisResult, FaceAnalysisResult, HandAnalysisResult, V
 import { Scan, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeAudioDataUrl } from "@/lib/audioAnalysis";
+import { extractPoseFeatures } from "@/lib/poseAnalysis";
 
 const FREE_USES_KEY = "bmbf_free_uses";
 const MAX_FREE_USES = 2;
@@ -141,6 +142,15 @@ const Index = () => {
           requestBody.audioFeatures = audioFeatures;
         } else {
           requestBody.image = currentMedia;
+          // For body mode, extract skeletal pose landmarks client-side via MediaPipe
+          if (mode === "body") {
+            try {
+              const poseFeatures = await extractPoseFeatures(currentMedia);
+              if (poseFeatures) requestBody.poseFeatures = poseFeatures;
+            } catch (e) {
+              console.warn("Pose extraction skipped:", e);
+            }
+          }
         }
 
         const response = await fetch(
