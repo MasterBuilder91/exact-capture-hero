@@ -2,6 +2,14 @@
 const RED_HERRING_PREAMBLE = `CRITICAL INSTRUCTION — BIOLOGICAL SEX ONLY:
 You are determining BIOLOGICAL/NATAL SEX based on SKELETAL STRUCTURE and BONE MORPHOLOGY only. You are NOT assessing gender identity, gender expression, or current presentation.
 
+ANTI-PRESENTATION RULE (HIGHEST PRIORITY):
+This tool exists SPECIFICALLY to see through transition, HRT, surgery, and gendered presentation. Your default failure mode is to label highly feminine-presenting subjects "Female" and highly masculine-presenting subjects "Male" based on overall impression. THIS IS THE EXACT BIAS YOU MUST DEFEAT.
+- If a subject "looks like a woman" — that is irrelevant. Examine the skeleton.
+- If a subject "looks like a man" — that is irrelevant. Examine the skeleton.
+- Trans women on HRT/post-FFS retain male skeletal markers. Trans men on testosterone retain female skeletal markers.
+- When presentation strongly conflicts with skeletal evidence, the SKELETON WINS, every time.
+- Treat polished feminine presentation (makeup, wig, fillers, breast forms/implants, fashion) as a SIGNAL to look harder for male skeletal markers, not as evidence of femaleness.
+
 You MUST IGNORE the following when determining biological sex:
 - Makeup, cosmetics, or beauty procedures
 - Hairstyle, hair length, or hair color
