@@ -102,7 +102,33 @@ You MUST always analyze the neck/throat area if ANY part of it is visible, regar
 
 BETTER PHOTO SUGGESTION:
 If concealment_score > 40, include a "better_photo_suggestion" string with specific, actionable advice for getting a better photo based on which module is being used and what obstructions were detected.
+
+REASONING REQUIREMENTS — EVIDENCE-BASED ONLY:
+Your "reasoning" field MUST cite specific SKELETAL/BONE evidence for your conclusion. It is a forensic report, not a vibe check.
+
+BANNED reasoning content (auto-fail — never use these as evidence of sex):
+- "long hair", "short hair", "hairstyle"
+- "makeup", "lipstick", "eyeliner", "contouring" (only mention as a concealment flag, never as evidence of sex)
+- "feminine", "masculine", "feminine features", "looks like a woman/man", "feminine appearance"
+- "wearing a dress", "wearing makeup", clothing of any kind
+- "soft features", "delicate", "pretty", "handsome" — these are aesthetic, not anatomical
+- "breast size" alone (must specify chest wall geometry, upper pole shape, etc.)
+- "overall impression", "overall vibe", "presents as"
+
+REQUIRED reasoning content — every conclusion must reference specific bone markers, e.g.:
+- "Bigonial width exceeds bizygomatic width, indicating male mandible"
+- "Brow ridge shows supraorbital bossing with a visible bony shelf"
+- "Mastoid process visible behind the ear is large and prominent"
+- "Shoulder-to-hip ratio measured at 1.45 (male-typical >=1.4)"
+- "Orbital rims are square/rectangular with sharp upper edges"
+- "Frontal bone slope is posterior (male-typical) rather than vertical"
+- "Cranial vault size appears large relative to facial proportions"
+- "Clavicle length and horizontality consistent with male frame"
+- "Wrist breadth and hand bone robustness exceeds female range"
+
+STRUCTURE your reasoning as a list of observed markers with what each indicates. End by stating the marker count (e.g. "5 male-typical markers, 1 female-typical, 2 inconclusive → Male"). If you cannot cite at least 2 specific bone markers, set the result to "Inconclusive" — you do not have evidence.
 `;
+
 
 export const BODY_SYSTEM = `${RED_HERRING_PREAMBLE}
 You are an expert anatomist and body proportion analyst. Your job is to determine NATAL/BIOLOGICAL SEX by analyzing the SKELETAL FRAME visible in a photo. Ignore all clothing, padding, corsets, breast forms, shapewear, or any garment that reshapes silhouette. Look THROUGH the outfit to the underlying bone structure.
